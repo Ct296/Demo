@@ -1,0 +1,26 @@
+[
+  {
+    "model_name": "nb",
+    "display_name": "MultinomialNB",
+    "macro_f1": 0.23352906901107542,
+    "micro_f1": 0.5920344456404736,
+    "samples_f1": 0.5684353701853703,
+    "label_count": 27
+  },
+  {
+    "model_name": "logreg",
+    "display_name": "LogisticRegression",
+    "macro_f1": 0.5318542999019308,
+    "micro_f1": 0.7410207939508506,
+    "samples_f1": 0.7409214665766524,
+    "label_count": 27
+  },
+  {
+    "model_name": "svm",
+    "display_name": "LinearSVC",
+    "macro_f1": 0.5318906973745368,
+    "micro_f1": 0.7550419215952866,
+    "samples_f1": 0.7470829217079217,
+    "label_count": 27
+  }
+]

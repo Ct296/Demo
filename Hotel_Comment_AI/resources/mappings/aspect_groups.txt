@@ -1,0 +1,7 @@
+SERVICE	dich_vu
+ROOMS	phong
+ROOM_AMENITIES	tien_nghi_phong
+LOCATION	vi_tri
+FOOD&DRINKS	an_uong
+FACILITIES	tien_ich
+HOTEL	tong_quan_khach_san

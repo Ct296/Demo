@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khách hàng - ITHotel</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/image/logofavicon.ico}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/manager/manager.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/customer-manager.css}">
+</head>
+<body class="manager-body">
+
+<div class="manager-shell">
+    <aside class="manager-sidebar">
+        <div class="manager-brand">
+            <div class="manager-brand-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div class="manager-brand-title">Manager Customer</div>
+                <div class="manager-brand-subtitle"
+                     th:text="${currentManager != null && currentManager.title != null ? currentManager.title.name() : 'MANAGER'}">
+                    MANAGER
+                </div>
+            </div>
+        </div>
+
+        <nav class="manager-nav">
+            <a href="#overview-section" class="manager-link active">
+                <i class="fas fa-gauge-high"></i>
+                <span>Tổng quan</span>
+            </a>
+            <a href="#ai-section" class="manager-link">
+                <i class="fas fa-brain"></i>
+                <span>Phân tích AI</span>
+            </a>
+            <a href="#tier-customer-section" class="manager-link">
+                <i class="fas fa-crown"></i>
+                <span>Hạng khách hàng</span>
+            </a>
+            <a href="#customer-section" class="manager-link">
+                <i class="fas fa-user-group"></i>
+                <span>Danh sách khách</span>
+            </a>
+            <a href="#review-section" class="manager-link">
+                <i class="fas fa-star"></i>
+                <span>Đánh giá</span>
+            </a>
+            <a th:href="@{/manager/profile}" class="manager-link">
+                <i class="fas fa-id-card"></i>
+                <span>Hồ sơ</span>
+            </a>
+            <form th:action="@{/logout}" method="post" class="mt-3">
+                <button type="submit" class="manager-link manager-link-button text-danger">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="manager-content customer-manager-page">
+        <section class="manager-page-header">
+            <div>
+                <h1>Quản lý khách hàng</h1>
+                <p>Quản lý hạng thành viên, theo dõi khách hàng và tổng hợp đánh giá.</p>
+            </div>
+        </section>
+
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <section id="overview-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Tổng quan khách hàng</h2>
+                    <p>Theo dõi tăng trưởng thành viên, hạng khách hàng và mức độ hài lòng qua review.</p>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-primary">
+                        <div class="stat-label">Khách hàng</div>
+                        <div class="stat-value" th:text="${customerCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-success">
+                        <div class="stat-label">Hạng thành viên</div>
+                        <div class="stat-value" th:text="${tierCustomerCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-warning">
+                        <div class="stat-label">Thành viên đang hoạt động</div>
+                        <div class="stat-value" th:text="${activeMemberCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-danger">
+                        <div class="stat-label">Điểm review trung bình</div>
+                        <div class="stat-value" th:text="${averageReviewRate}">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-6">
+                    <div class="sub-card">
+                        <h3>Mật độ khách hàng theo hạng</h3>
+                        <div class="simple-list">
+                            <div class="simple-list-item" th:each="item : ${customerTierSummary}">
+                                <span th:text="${item.key}">Silver</span>
+                                <strong th:text="${item.value}">10</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="sub-card">
+                        <h3>Phân bố số sao đánh giá</h3>
+                        <div class="simple-list">
+                            <div class="simple-list-item" th:each="item : ${reviewRateSummary}">
+                                <span th:text="${item.key} + ' sao'">5 sao</span>
+                                <strong th:text="${item.value}">4</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ai-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Phân tích đánh giá bằng AI</h2>
+                    <p>
+                        Quét toàn bộ review thật từ database, phân tích cảm xúc và nhóm vấn đề,
+                        sau đó lưu kết quả ra file để phục vụ dashboard AI.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-5">
+                    <div class="sub-card">
+                        <h3>Quét dữ liệu review</h3>
+                        <p class="text-muted mb-3">
+                            Hệ thống sẽ đọc các đánh giá hiện có trong database, phân tích bằng model AI
+                            và lưu kết quả ra file export runtime. Dataset train sẽ không được dùng ở màn này.
+                        </p>
+
+                        <form th:action="@{/manager/customer/ai/export}" method="post">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-wand-magic-sparkles me-2"></i>
+                                Quét review bằng AI
+                            </button>
+                        </form>
+
+                        <div class="mt-3 small text-muted">
+                            Có thể bấm tay để quét ngay. Sau này hệ thống có thể chạy định kỳ theo lịch.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-7">
+                    <div class="sub-card">
+                        <h3>Trạng thái export AI</h3>
+
+                        <div class="ai-status-grid">
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">File kết quả</span>
+                                <strong th:text="${aiExportFile != null ? aiExportFile : 'Chưa có dữ liệu'}">
+                                    Chưa có dữ liệu
+                                </strong>
+                            </div>
+
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">Tổng review trong DB</span>
+                                <strong th:text="${aiTotalReviews != null ? aiTotalReviews : 0}">0</strong>
+                            </div>
+
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">Thêm mới lần gần nhất</span>
+                                <strong th:text="${aiInserted != null ? aiInserted : 0}">0</strong>
+                            </div>
+
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">Cập nhật lần gần nhất</span>
+                                <strong th:text="${aiUpdated != null ? aiUpdated : 0}">0</strong>
+                            </div>
+
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">Bỏ qua lần gần nhất</span>
+                                <strong th:text="${aiSkipped != null ? aiSkipped : 0}">0</strong>
+                            </div>
+
+                            <div class="ai-status-item">
+                                <span class="ai-status-label">Thời điểm chạy gần nhất</span>
+                                <strong th:text="${aiExecutedAt != null ? #temporals.format(aiExecutedAt, 'dd/MM/yyyy HH:mm:ss') : 'Chưa chạy'}">
+                                    Chưa chạy
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-xl-4 col-md-6">
+                    <div class="stat-box stat-success">
+                        <div class="stat-label">Review tích cực</div>
+                        <div class="stat-value" th:text="${aiPositiveCount != null ? aiPositiveCount : 0}">0</div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="stat-box stat-danger">
+                        <div class="stat-label">Review tiêu cực</div>
+                        <div class="stat-value" th:text="${aiNegativeCount != null ? aiNegativeCount : 0}">0</div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="stat-box stat-warning">
+                        <div class="stat-label">Review trung tính</div>
+                        <div class="stat-value" th:text="${aiNeutralCount != null ? aiNeutralCount : 0}">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-xl-6">
+                    <div class="sub-card">
+                        <h3>Top nhóm bị chê nhiều</h3>
+                        <div th:if="${aiNegativeAspectSummary == null || aiNegativeAspectSummary.isEmpty()}"
+                             class="text-muted">
+                            Chưa có dữ liệu phân tích.
+                        </div>
+
+                        <div class="simple-list" th:if="${aiNegativeAspectSummary != null && !aiNegativeAspectSummary.isEmpty()}">
+                            <div class="simple-list-item" th:each="item : ${aiNegativeAspectSummary}">
+                                <span th:text="${item.key}">ve_sinh</span>
+                                <strong th:text="${item.value}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="sub-card">
+                        <h3>Top nhóm được khen nhiều</h3>
+                        <div th:if="${aiPositiveAspectSummary == null || aiPositiveAspectSummary.isEmpty()}"
+                             class="text-muted">
+                            Chưa có dữ liệu phân tích.
+                        </div>
+
+                        <div class="simple-list" th:if="${aiPositiveAspectSummary != null && !aiPositiveAspectSummary.isEmpty()}">
+                            <div class="simple-list-item" th:each="item : ${aiPositiveAspectSummary}">
+                                <span th:text="${item.key}">dich_vu</span>
+                                <strong th:text="${item.value}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="tier-customer-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Quản lý hạng khách hàng</h2>
+                    <p>Cấu hình điều kiện chi tiêu, quyền lợi và phần trăm giảm giá cho từng hạng.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="sub-card">
+                        <h3 th:text="${editingTierCustomer != null ? 'Chỉnh sửa hạng khách hàng' : 'Thêm hạng khách hàng mới'}">Thêm hạng khách hàng mới</h3>
+
+                        <form th:action="@{/manager/customer/tier-customers/save}" method="post">
+                            <input type="hidden" name="tierCustomerId" th:value="${editingTierCustomer != null ? editingTierCustomer.id : ''}">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Tên hạng</label>
+                                <input type="text" name="name" class="form-control" maxlength="30" required
+                                       th:value="${editingTierCustomer != null ? editingTierCustomer.name : ''}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Điều kiện chi tiêu</label>
+                                <input type="number" step="0.01" name="condition" class="form-control" min="0" required
+                                       th:value="${editingTierCustomer != null ? editingTierCustomer.condition : ''}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Giảm giá (%)</label>
+                                <input type="number" step="0.01" name="discount" class="form-control" min="0" max="100" required
+                                       th:value="${editingTierCustomer != null && editingTierCustomer.discount != null ? editingTierCustomer.discount : 0}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Quyền lợi</label>
+                                <textarea name="benefit" class="form-control" rows="4" maxlength="255"
+                                          th:text="${editingTierCustomer != null ? editingTierCustomer.benefit : ''}"></textarea>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${editingTierCustomer != null ? 'Lưu cập nhật' : 'Thêm hạng khách hàng'}">Thêm hạng khách hàng</span>
+                                </button>
+                                <a th:href="@{/manager/customer/dashboard#tier-customer-section}" class="btn btn-outline-secondary">Làm mới</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-xl-8">
+                    <div class="sub-card">
+                        <h3>Danh sách hạng khách hàng</h3>
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table tier-table">
+                                <colgroup>
+                                    <col style="width: 14%;">
+                                    <col style="width: 18%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 40%;">
+                                    <col style="width: 16%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Tên hạng</th>
+                                    <th>Điều kiện</th>
+                                    <th>Giảm giá</th>
+                                    <th>Quyền lợi</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${tierCustomers == null || tierCustomers.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có hạng khách hàng nào.</td>
+                                </tr>
+                                <tr th:each="item : ${tierCustomers}">
+                                    <td class="fw-bold" th:text="${item.name}">Silver</td>
+                                    <td th:text="${#numbers.formatDecimal(item.condition, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                    <td th:text="${item.discount != null ? item.discount + '%' : '0%'}">0%</td>
+                                    <td class="text-break-anywhere" th:text="${item.benefit}">Quyền lợi</td>
+                                    <td>
+                                        <a th:href="@{'/manager/customer/dashboard?editTierCustomer=' + ${item.id} + '#tier-customer-section'}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-pen me-1"></i>Sửa
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="customer-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Danh sách khách hàng</h2>
+                    <p>Xem tài khoản khách hàng, hạng hiện tại và tổng số tiền khách đã chi qua toàn bộ bill. Không cho đổi hạng thủ công tại đây.</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table customer-table">
+                    <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Liên hệ</th>
+                        <th>Hạng hiện tại</th>
+                        <th>Tổng đã chi</th>
+                        <th>Ngày tạo</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${customers == null || customers.isEmpty()}">
+                        <td colspan="5" class="text-center text-muted py-4">Chưa có khách hàng nào.</td>
+                    </tr>
+                    <tr th:each="customer : ${customers}">
+                        <td>
+                            <div class="fw-bold"
+                                 th:text="${customer.user != null ? (customer.user.lastName + ' ' + customer.user.firstName) : customer.id}">
+                                Nguyễn Văn A
+                            </div>
+                            <div class="small text-muted">ID: <span th:text="${customer.id}">CUS001</span></div>
+                            <div class="small text-muted">PID: <span th:text="${customer.user != null ? customer.user.pid : ''}">123456789</span></div>
+                        </td>
+                        <td>
+                            <div th:text="${customer.user != null ? customer.user.email : ''}">a@email.com</div>
+                            <div class="small text-muted" th:text="${customer.user != null ? customer.user.phoneNumber : ''}">0123456789</div>
+                        </td>
+                        <td>
+                <span class="badge text-bg-warning text-dark"
+                      th:text="${currentTierByCustomerId[customer.id] != null ? currentTierByCustomerId[customer.id].name : 'Chưa có'}">
+                    Silver
+                </span>
+                        </td>
+                        <td>
+                <span class="fw-semibold"
+                      th:text="${#numbers.formatDecimal(totalSpendingByCustomerId[customer.id] != null ? totalSpendingByCustomerId[customer.id] : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    0 đ
+                </span>
+                            <div class="small text-muted">Cộng toàn bộ bill của khách</div>
+                        </td>
+                        <td>
+                <span th:text="${customer.user != null && customer.user.createDate != null ? #temporals.format(customer.user.createDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                    10/03/2026 09:00
+                </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="sub-card mt-4">
+                <h3>Lịch sử hạng gần đây</h3>
+                <div class="table-responsive">
+                    <table class="table align-middle manager-table history-table">
+                        <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Hạng</th>
+                            <th>Tổng chi tiêu</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Lý do</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${tierHistories == null || tierHistories.isEmpty()}">
+                            <td colspan="6" class="text-center text-muted py-4">Chưa có lịch sử hạng nào.</td>
+                        </tr>
+                        <tr th:each="history : ${tierHistories}">
+                            <td th:text="${history.customer != null && history.customer.user != null ? (history.customer.user.lastName + ' ' + history.customer.user.firstName) : 'N/A'}">
+                                Nguyễn Văn A
+                            </td>
+                            <td th:text="${history.tierCustomer != null ? history.tierCustomer.name : 'N/A'}">Silver</td>
+                            <td th:text="${#numbers.formatDecimal(history.totalSpending, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            <td th:text="${history.startDate != null ? #temporals.format(history.startDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">10/03/2026 09:00</td>
+                            <td th:text="${history.endDate != null ? #temporals.format(history.endDate, 'dd/MM/yyyy HH:mm') : 'Đang hiệu lực'}">10/03/2026 09:00</td>
+                            <td class="text-break-anywhere" th:text="${history.reason}">Khởi tạo hạng</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="review-section" class="manager-card">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Đánh giá khách hàng</h2>
+                    <p>Tổng hợp review để theo dõi mức độ hài lòng với phòng và dịch vụ.</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table review-table">
+                    <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Số sao</th>
+                        <th>Nội dung</th>
+                        <th>Cập nhật</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${reviews == null || reviews.isEmpty()}">
+                        <td colspan="4" class="text-center text-muted py-4">Chưa có đánh giá nào.</td>
+                    </tr>
+                    <tr th:each="review : ${reviews}">
+                        <td th:text="${review.customer != null && review.customer.user != null ? (review.customer.user.lastName + ' ' + review.customer.user.firstName) : 'N/A'}">
+                            Nguyễn Văn A
+                        </td>
+                        <td>
+                            <span class="badge text-bg-warning text-dark" th:text="${review.rate} + ' sao'">5 sao</span>
+                        </td>
+                        <td class="text-break-anywhere" th:text="${review.description != null && !review.description.isBlank() ? review.description : 'Không có mô tả chi tiết.'}">
+                            Dịch vụ tốt
+                        </td>
+                        <td th:text="${review.updateDate != null ? #temporals.format(review.updateDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                            10/03/2026 09:00
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/manager/manager-nav.js}"></script>
+</body>
+</html>

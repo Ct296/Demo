@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold">Xác thực email đăng ký</h3>
+                        <p class="text-muted mb-0">
+                            Chúng tôi đã gửi mã OTP tới
+                            <span class="fw-bold" th:text="${pendingEmail}"></span>.
+                        </p>
+                        <p class="small text-muted mt-2 mb-0">
+                            Mã có hiệu lực trong <span th:text="${otpExpireMinutes}">5</span> phút.
+                        </p>
+                    </div>
+
+                    <div th:if="${error}" class="alert alert-danger text-center small" th:text="${error}"></div>
+                    <div th:if="${message}" class="alert alert-success text-center small" th:text="${message}"></div>
+
+                    <form th:action="@{/register/verify}" method="post" class="mb-3">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Nhập mã OTP 6 chữ số</label>
+                            <input type="text"
+                                   name="otp"
+                                   class="form-control text-center fs-4 tracking-wide"
+                                   maxlength="6"
+                                   pattern="\d{6}"
+                                   inputmode="numeric"
+                                   placeholder="000000"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
+                            XÁC NHẬN ĐĂNG KÝ
+                        </button>
+                    </form>
+
+                    <form th:action="@{/register/resend-otp}" method="post" class="mb-3">
+                        <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-bold">
+                            GỬI LẠI MÃ OTP
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-3 border-top">
+                        <a th:href="@{/register}" class="small text-decoration-none fw-bold">Quay lại đăng ký</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+</body>
+</html>

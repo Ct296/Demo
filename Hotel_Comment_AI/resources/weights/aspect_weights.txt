@@ -1,0 +1,10 @@
+ve_sinh	1.50
+phong	1.40
+tien_nghi_phong	1.30
+dich_vu	1.30
+gia_ca	1.20
+an_uong	1.00
+tien_ich	0.90
+vi_tri	0.80
+tong_quan_khach_san	0.70
+khac	0.50

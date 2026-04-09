@@ -1,0 +1,10 @@
+dich_vu	nhan vien|le tan|phuc vu|check in|check out|ho tro|bao ve|quan ly|don tiep|thai do
+gia_ca	gia|gia_ca|chi phi|dat|re|hop ly|phu thu
+ve_sinh	sach|ban|hoi|mui|mui hoi|am_moc|bui|toilet hoi|khong_sach|ve sinh
+phong	phong|giuong|dem|drap|rong|chat|bi|thoang|cua so|cach am
+tien_nghi_phong	may lanh|toilet|phong tam|nuoc nong|wi fi|wifi|tv|tivi|tu lanh|voi sen|thiet bi|tien nghi
+an_uong	an sang|buffet|do an|mon an|thuc an|nha hang|ca phe|an_uong|bua sang
+tien_ich	ho boi|be boi|spa|massage|bai do xe|thang may|xe dua don|karaoke|tien ich|khu vui choi
+vi_tri	vi tri|gan bien|gan trung tam|trung tam|thuan tien|di lai|xa|hem|mat duong|gan pho co
+tong_quan_khach_san	khach san|resort|tong quan|chung|nhin chung|toan bo|trai nghiem|hai long
+khac	binh thuong|tam_duoc

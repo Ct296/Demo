@@ -1,0 +1,28 @@
+.hotel-service-manager-page .service-table td:last-child,
+.hotel-service-manager-page .service-table th:last-child {
+    text-align: center;
+}
+
+.hotel-service-manager-page .service-table .btn-sm {
+    min-width: 72px;
+}
+
+.hotel-service-manager-page .service-table td:nth-child(1) small {
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.hotel-service-manager-page .usage-table td:nth-child(1) {
+    max-width: 0;
+}
+
+.hotel-service-manager-page .simple-list-item strong {
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .hotel-service-manager-page .service-table,
+    .hotel-service-manager-page .usage-table {
+        table-layout: auto;
+    }
+}

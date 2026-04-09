@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý nhân sự - ITHotel</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/image/logofavicon.ico}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/manager/manager.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/hr-manager.css}">
+    
+</head>
+<body class="manager-body">
+
+<div class="manager-shell"
+     th:with="hasExplicitSelectedDate=${param.selectedDate != null and !#lists.isEmpty(param.selectedDate)}">
+    <aside class="manager-sidebar">
+        <div class="manager-brand">
+            <div class="manager-brand-icon">
+                <i class="fas fa-people-group"></i>
+            </div>
+            <div>
+                <div class="manager-brand-title">Manager HR</div>
+                <div class="manager-brand-subtitle"
+                     th:text="${currentManager != null && currentManager.title != null ? currentManager.title.name() : 'MANAGER'}">
+                    MANAGER
+                </div>
+            </div>
+        </div>
+
+        <nav class="manager-nav">
+            <a href="#overview-section" class="manager-link active">
+                <i class="fas fa-gauge-high"></i>
+                <span>Tổng quan</span>
+            </a>
+            <a href="#schedule-section" class="manager-link">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Lịch làm việc</span>
+            </a>
+            <a href="#staff-section" class="manager-link">
+                <i class="fas fa-user-tie"></i>
+                <span>Nhân viên</span>
+            </a>
+            <a th:href="@{/manager/profile}" class="manager-link">
+                <i class="fas fa-id-card"></i>
+                <span>Hồ sơ</span>
+            </a>
+            <form th:action="@{/logout}" method="post" class="mt-3">
+                <button type="submit" class="manager-link manager-link-button text-danger">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="manager-content hr-manager-page">
+        <section class="manager-page-header">
+            <div>
+                <h1>Quản lý nhân sự</h1>
+                <p>Xem lịch theo ngày, phân công nhân viên theo ca và thao tác chấm công trực tiếp ngay trong ngày đang chọn.</p>
+            </div>
+        </section>
+
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <section id="overview-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Tổng quan nhân sự</h2>
+                    <p>Theo dõi nhanh số lượng nhân viên, ca làm, phân công đang hoạt động và trạng thái chấm công.</p>
+                </div>
+            </div>
+
+            <div class="hr-overview-grid">
+                <div class="stat-box stat-primary">
+                    <div class="stat-label">Nhân viên</div>
+                    <div class="stat-value" th:text="${staffCount}">0</div>
+                </div>
+
+                <div class="stat-box stat-success">
+                    <div class="stat-label">Lịch làm việc</div>
+                    <div class="stat-value" th:text="${scheduleCount}">0</div>
+                </div>
+
+                <div class="stat-box stat-warning">
+                    <div class="stat-label">Phân công hoạt động</div>
+                    <div class="stat-value" th:text="${activeAssignmentCount}">0</div>
+                </div>
+
+                <div class="stat-box stat-danger">
+                    <div class="stat-label">Bản ghi chấm công</div>
+                    <div class="stat-value" th:text="${historyWorks != null ? historyWorks.size() : 0}">0</div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-xl-6">
+                    <div class="sub-card h-100">
+                        <h3>Phân bố trạng thái chấm công</h3>
+                        <div class="simple-list">
+                            <div class="simple-list-item" th:if="${attendanceStatusCount == null || attendanceStatusCount.isEmpty()}">
+                                <span>Chưa có dữ liệu</span>
+                                <strong>0</strong>
+                            </div>
+                            <div class="simple-list-item" th:each="item : ${attendanceStatusCount}">
+                                <span th:text="${item.key}">Đã chấm công</span>
+                                <strong th:text="${item.value}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="sub-card h-100">
+                        <h3>Tổng hợp nhanh</h3>
+                        <div class="simple-list">
+                            <div class="simple-list-item">
+                                <span>Hoàn tất</span>
+                                <strong th:text="${completedAttendanceCount}">0</strong>
+                            </div>
+                            <div class="simple-list-item">
+                                <span>Vắng ca</span>
+                                <strong th:text="${missedAttendanceCount}">0</strong>
+                            </div>
+                            <div class="simple-list-item">
+                                <span>Ngày đang chọn</span>
+                                <strong th:text="${hasExplicitSelectedDate ? selectedDateLabel : 'Chưa chọn ngày'}">Chưa chọn ngày</strong>
+                            </div>
+                            <div class="simple-list-item">
+                                <span>Số ca của ngày chọn</span>
+                                <strong th:text="${hasExplicitSelectedDate and selectedDateSchedules != null ? selectedDateSchedules.size() : 0}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule-section" class="manager-card mb-4">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Lịch làm việc theo tháng</h2>
+                    <p>Chỉ hiển thị các ngày thuộc đúng tháng đang xem. Dropdown chi tiết chỉ xuất hiện khi bạn bấm vào một ô ngày.</p>
+                </div>
+            </div>
+
+            <div class="hr-month-toolbar">
+                <div class="hr-month-toolbar-left">
+                    <button type="button"
+                            class="btn btn-outline-secondary hr-month-nav-btn"
+                            id="hrPrevMonthBtn"
+                            title="Tháng trước"
+                            aria-label="Tháng trước">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+
+                    <div class="hr-month-chip">
+                        <i class="fas fa-calendar-days"></i>
+                        <span th:text="${monthTitle}">Tháng 4 2026</span>
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary hr-month-nav-btn"
+                            id="hrNextMonthBtn"
+                            title="Tháng sau"
+                            aria-label="Tháng sau">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="hr-month-toolbar-right">
+                    <form th:action="@{/manager/hr/dashboard}" method="get" class="hr-month-form" id="hrMonthForm">
+                        <label class="form-label fw-semibold mb-0">Tháng</label>
+                        <input type="month" name="month" class="form-control" th:value="${monthValue}" id="hrMonthInput">
+                        <input type="hidden" name="selectedDate" th:value="${hasExplicitSelectedDate ? selectedDateValue : ''}" id="hrSelectedDateInput">
+                        <input type="hidden" name="attendanceScheduleId" th:value="${hasExplicitSelectedDate and selectedAttendanceSchedule != null ? selectedAttendanceSchedule.scheduleId : ''}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-rotate me-1"></i>Xem tháng
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="hr-calendar-shell">
+                <div class="hr-calendar-head">
+                    <h3>Bảng lịch theo ngày</h3>
+                    <p>Khi mới vào trang sẽ không hiện dropdown. Hãy bấm vào một ô ngày để mở chi tiết của tuần tương ứng.</p>
+                </div>
+
+                <div class="hr-calendar-table-wrap">
+                    <table class="hr-calendar-table">
+                        <thead>
+                        <tr>
+                            <th>Thứ 2</th>
+                            <th>Thứ 3</th>
+                            <th>Thứ 4</th>
+                            <th>Thứ 5</th>
+                            <th>Thứ 6</th>
+                            <th>Thứ 7</th>
+                            <th>Chủ nhật</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <th:block th:each="week : ${calendarWeeks}"
+                                  th:with="weekHasSelected=${week.?[selected].size() > 0},
+                                           selectedDayAttendance=${attendanceSchedules != null ? attendanceSchedules.?[dateText == #vars.selectedDateLabel] : T(java.util.Collections).emptyList()}">
+
+                            <tr class="hr-week-row">
+                                <td th:each="day : ${week}"
+                                    class="hr-day-cell"
+                                    th:classappend="${hasExplicitSelectedDate and day.selected ? ' is-selected' : ''} + ${day.today ? ' is-today' : ''} + ${!day.inCurrentMonth ? ' is-outside-month' : ''}">
+
+                                    <a th:if="${day.inCurrentMonth}"
+                                       class="hr-day-link"
+                                       th:href="@{/manager/hr/dashboard(month=${monthValue}, selectedDate=${day.value}, attendanceScheduleId=${selectedAttendanceSchedule != null ? selectedAttendanceSchedule.scheduleId : null})}">
+                                        <div class="hr-day-top">
+                                            <span class="hr-day-number" th:text="${day.dayNumber}">1</span>
+                                            <span class="hr-day-meta">
+                                                <span th:text="${day.dayName}">T2</span>
+                                            </span>
+                                        </div>
+
+                                        <div class="hr-day-schedule-stack" th:if="${day.schedules != null && !day.schedules.isEmpty()}">
+                                            <div class="hr-day-schedule-pill"
+                                                 th:each="schedule : ${day.schedules}"
+                                                 th:classappend="${schedule.badgeClass != null ? ' ' + schedule.badgeClass : ''}">
+                                                <span class="hr-day-schedule-name" th:text="${schedule.shiftName}">Sáng</span>
+                                                <span class="hr-day-schedule-count" th:text="${schedule.staffs != null ? schedule.staffs.size() : 0}">0</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-day-empty" th:if="${day.schedules == null || day.schedules.isEmpty()}">
+                                            Chưa có ca
+                                        </div>
+                                    </a>
+
+                                    <div th:if="${!day.inCurrentMonth}" class="hr-day-blocked"></div>
+                                </td>
+                            </tr>
+
+                            <tr class="hr-detail-row" th:if="${hasExplicitSelectedDate and weekHasSelected}">
+                                <td colspan="7">
+                                    <div class="hr-detail-panel">
+                                        <div class="hr-detail-panel-head">
+                                            <div>
+                                                <h3>Chi tiết ngày <span th:text="${selectedDateLabel}">05/04/2026</span></h3>
+                                                <p>Tạo ca mới, phân công nhân viên và thao tác chấm công cho các ca thuộc ngày đang chọn.</p>
+                                            </div>
+
+                                            <div class="hr-selected-chip">
+                                                <i class="fas fa-bullseye"></i>
+                                                <span>Ngày đang chọn:</span>
+                                                <strong th:text="${selectedDateLabel}">05/04/2026</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-detail-grid">
+                                            <div class="hr-detail-card">
+                                                <h4>Tạo ca cho ngày này</h4>
+                                                <form th:action="@{/manager/hr/work-schedules/save}" method="post" class="hr-create-form">
+                                                    <div>
+                                                        <label class="form-label fw-semibold">Ngày làm việc</label>
+                                                        <input type="date" name="date" class="form-control" th:value="${selectedDateValue}" required>
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="form-label fw-semibold">Ca làm việc</label>
+                                                        <select name="shift" class="form-select" required>
+                                                            <option value="">-- Chọn ca --</option>
+                                                            <option th:each="item : ${shifts}"
+                                                                    th:value="${item.name()}"
+                                                                    th:text="${item.displayName}">
+                                                                Sáng
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-plus me-2"></i>Tạo ca
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <div>
+                                                <div class="hr-empty-box mb-3" th:if="${selectedDateSchedules == null || selectedDateSchedules.isEmpty()}">
+                                                    Ngày này chưa có ca làm việc nào. Hãy tạo ca ở khung bên trái.
+                                                </div>
+
+                                                <div class="hr-shift-grid" th:if="${selectedDateSchedules != null && !selectedDateSchedules.isEmpty()}">
+                                                    <div class="hr-shift-card"
+                                                         th:each="schedule : ${selectedDateSchedules}"
+                                                         th:classappend="${schedule.staffs == null || schedule.staffs.isEmpty() ? ' is-empty' : ''}">
+                                                        <div class="hr-shift-head">
+                                                            <div>
+                                                                <h4 th:text="${schedule.shiftName}">Ca sáng</h4>
+                                                                <div class="hr-shift-meta">
+                                                                    <span th:text="${schedule.rangeText}">06:00 - 12:00</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="hr-shift-actions">
+                                                                <span class="hr-chip">
+                                                                    <i class="fas fa-hashtag"></i>
+                                                                    <span th:text="${schedule.scheduleId}">WKS0001</span>
+                                                                </span>
+
+                                                                <span class="hr-chip">
+                                                                    <i class="fas fa-users"></i>
+                                                                    <span th:text="${schedule.staffs != null ? schedule.staffs.size() : 0} + ' NV'">0 NV</span>
+                                                                </span>
+
+                                                                <form th:action="@{'/manager/hr/work-schedules/' + ${schedule.scheduleId} + '/delete'}"
+                                                                      method="post"
+                                                                      class="hr-delete-schedule-form"
+                                                                      onsubmit="return confirm('Bạn có chắc muốn xóa ca làm này? Hệ thống sẽ gỡ toàn bộ phân công chưa phát sinh chấm công thực tế.');">
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                        <i class="fas fa-trash me-1"></i>Xóa ca
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="hr-shift-body">
+                                                            <div class="hr-assignment-list" th:if="${schedule.staffs != null && !schedule.staffs.isEmpty()}">
+                                                                <div class="hr-assignment-item" th:each="staffMini : ${schedule.staffs}">
+                                                                    <div class="hr-assignment-main">
+                                                                        <div class="hr-assignment-name"
+                                                                             th:text="${staffMini.fullName}">Nguyễn Văn A</div>
+                                                                        <div class="hr-assignment-meta">
+                                                                            <span th:text="${staffMini.staffId}">ST001</span>
+                                                                            <span> · </span>
+                                                                            <span th:text="${staffMini.shortName}">A</span>
+                                                                        </div>
+                                                                        <div class="hr-assignment-note"
+                                                                             th:if="${staffMini.note != null && !#strings.isEmpty(staffMini.note)}"
+                                                                             th:text="${'Ghi chú: ' + staffMini.note}">
+                                                                            Ghi chú: hỗ trợ quầy chính
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="hr-assignment-actions">
+                                                                        <form th:action="@{'/manager/hr/work-assignments/' + ${staffMini.assignmentId} + '/remove'}"
+                                                                              method="post"
+                                                                              class="hr-remove-assignment-form"
+                                                                              onsubmit="return confirm('Bạn có chắc muốn gỡ nhân viên này khỏi ca làm?');">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                                <i class="fas fa-user-minus me-1"></i>Gỡ
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="hr-empty-box" th:if="${schedule.staffs == null || schedule.staffs.isEmpty()}">
+                                                                Ca này chưa có nhân viên nào được phân công.
+                                                            </div>
+
+                                                            <form th:action="@{'/manager/hr/work-schedules/' + ${schedule.scheduleId} + '/assign-staff'}"
+                                                                  method="post"
+                                                                  class="hr-inline-form">
+                                                                <div>
+                                                                    <label class="form-label fw-semibold">Nhân viên</label>
+                                                                    <select name="staffId" class="form-select" required>
+                                                                        <option value="">-- Chọn nhân viên --</option>
+                                                                        <option th:each="item : ${staffs}"
+                                                                                th:value="${item.id}"
+                                                                                th:text="${item.user != null ? item.user.lastName + ' ' + item.user.firstName + ' - ' + item.id : item.id}">
+                                                                            Nguyễn Văn A - ST001
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="form-label fw-semibold">Ghi chú</label>
+                                                                    <input type="text" name="note" class="form-control" maxlength="255" placeholder="Ghi chú phân công (nếu có)">
+                                                                </div>
+
+                                                                <div>
+                                                                    <button type="submit" class="btn btn-primary w-100">
+                                                                        <i class="fas fa-user-plus me-1"></i>Phân công
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-attendance-grid">
+                                            <div class="hr-attendance-card"
+                                                 th:each="attendanceItem : ${selectedDayAttendance}"
+                                                 th:classappend="${attendanceItem.inPast ? ' is-dim' : ''} + ${(attendanceItem.rows != null && attendanceItem.rows.?[canCheckin or canCheckout].size() > 0) ? ' is-active' : ' is-dim'}">
+                                                <div class="hr-attendance-head">
+                                                    <div>
+                                                        <h4 th:text="${attendanceItem.shiftName}">Sáng</h4>
+                                                        <div class="hr-attendance-meta">
+                                                            <span th:text="${attendanceItem.rangeText}">06:00 - 12:00</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <span class="hr-chip">
+                                                        <i class="fas fa-clock"></i>
+                                                        <span th:text="${attendanceItem.inPast ? 'Qua ca' : ((attendanceItem.rows != null && attendanceItem.rows.?[canCheckin or canCheckout].size() > 0) ? 'Đang thao tác được' : 'Chưa tới / đang chờ')}">
+                                                            Đang thao tác được
+                                                        </span>
+                                                    </span>
+                                                </div>
+
+                                                <div class="hr-attendance-stats">
+                                                    <span class="hr-attendance-stat">
+                                                        <i class="fas fa-users"></i>
+                                                        <span th:text="${attendanceItem.rows != null ? attendanceItem.rows.size() : 0} + ' NV'">0 NV</span>
+                                                    </span>
+                                                    <span class="hr-attendance-stat">
+                                                        <i class="fas fa-circle-check text-success"></i>
+                                                        <span th:text="${attendanceItem.completedCount} + ' hoàn tất'">0 hoàn tất</span>
+                                                    </span>
+                                                    <span class="hr-attendance-stat">
+                                                        <i class="fas fa-triangle-exclamation text-danger"></i>
+                                                        <span th:text="${attendanceItem.missedCount} + ' vắng'">0 vắng</span>
+                                                    </span>
+                                                </div>
+
+                                                <div class="hr-empty-box" th:if="${attendanceItem.rows == null || attendanceItem.rows.isEmpty()}">
+                                                    Chưa có nhân viên được phân công vào ca này.
+                                                </div>
+
+                                                <div class="hr-attendance-table-wrap" th:if="${attendanceItem.rows != null && !attendanceItem.rows.isEmpty()}">
+                                                    <table class="table align-middle manager-table hr-attendance-table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Nhân viên</th>
+                                                            <th>Trạng thái</th>
+                                                            <th>Check-in</th>
+                                                            <th>Check-out</th>
+                                                            <th>Thao tác</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr th:each="row : ${attendanceItem.rows}">
+                                                            <td>
+                                                                <div class="fw-bold" th:text="${row.staffName}">Nguyễn Văn A</div>
+                                                                <div class="small text-muted" th:text="${row.email}">staff@email.com</div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge"
+                                                                      th:classappend="${
+                                                                        row.status != null && row.status.name() == 'COMPLETED' ? ' text-bg-success' :
+                                                                        (row.status != null && row.status.name() == 'CHECKED_IN' ? ' text-bg-warning text-dark' :
+                                                                        (row.status != null && row.status.name() == 'MISSED' ? ' text-bg-danger' :
+                                                                        (row.status != null && row.status.name() == 'NOT_STARTED' ? ' text-bg-secondary' : ' text-bg-light border text-dark')))
+                                                                      }"
+                                                                      th:text="${row.statusText}">
+                                                                    Đã chấm công
+                                                                </span>
+                                                            </td>
+                                                            <td th:text="${row.checkinText}">-</td>
+                                                            <td th:text="${row.checkoutText}">-</td>
+                                                            <td>
+                                                                <div class="hr-attendance-actions">
+                                                                    <form th:if="${row.canCheckin}"
+                                                                          th:action="@{'/manager/hr/work-schedules/' + ${attendanceItem.scheduleId} + '/checkin/' + ${row.staffId}}"
+                                                                          method="post"
+                                                                          onsubmit="return confirm('Xác nhận check-in cho nhân viên này?')">
+                                                                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="fas fa-right-to-bracket me-1"></i>Check-in
+                                                                        </button>
+                                                                    </form>
+
+                                                                    <form th:if="${row.canCheckout}"
+                                                                          th:action="@{'/manager/hr/work-schedules/' + ${attendanceItem.scheduleId} + '/checkout/' + ${row.staffId}}"
+                                                                          method="post"
+                                                                          onsubmit="return confirm('Xác nhận checkout cho nhân viên này?')">
+                                                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                                                            <i class="fas fa-right-from-bracket me-1"></i>Check-out
+                                                                        </button>
+                                                                    </form>
+
+                                                                    <span th:if="${!row.canCheckin && !row.canCheckout}" class="text-muted small">
+                                                                        Không thao tác
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="hr-empty-box" th:if="${selectedDayAttendance == null || selectedDayAttendance.isEmpty()}">
+                                                Ngày này chưa có ca nào để thao tác chấm công.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="staff-section" class="manager-card">
+            <div class="manager-card-title">
+                <div>
+                    <h2>Danh sách nhân viên</h2>
+                    <p>Xem nhanh hồ sơ nhân sự hiện có để phục vụ phân công theo ca.</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table hr-staff-table">
+                    <colgroup>
+                        <col style="width: 24%;">
+                        <col style="width: 20%;">
+                        <col style="width: 12%;">
+                        <col style="width: 20%;">
+                        <col style="width: 12%;">
+                        <col style="width: 12%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Nhân viên</th>
+                        <th>Liên hệ</th>
+                        <th>Giới tính</th>
+                        <th>Ngày vào làm</th>
+                        <th>Trạng thái</th>
+                        <th>ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${staffs == null || staffs.isEmpty()}">
+                        <td colspan="6" class="text-center text-muted py-4">Chưa có nhân viên nào.</td>
+                    </tr>
+                    <tr th:each="staff : ${staffs}">
+                        <td>
+                            <div class="fw-bold"
+                                 th:text="${staff.user != null ? staff.user.lastName + ' ' + staff.user.firstName : 'N/A'}">
+                                Nguyễn Văn A
+                            </div>
+                            <div class="small text-muted"
+                                 th:text="${staff.user != null ? staff.user.pid : ''}">
+                                123456789
+                            </div>
+                        </td>
+                        <td>
+                            <div th:text="${staff.user != null ? staff.user.email : ''}">staff@email.com</div>
+                            <div class="small text-muted" th:text="${staff.user != null ? staff.user.phoneNumber : ''}">0123456789</div>
+                        </td>
+                        <td th:text="${staff.user != null && staff.user.sex != null ? staff.user.sex.name() : 'N/A'}">MALE</td>
+                        <td th:text="${staff.employmentTime != null ? #temporals.format(staff.employmentTime, 'dd/MM/yyyy HH:mm') : 'N/A'}">10/03/2026 09:00</td>
+                        <td>
+                            <span class="badge text-bg-success">Đang làm việc</span>
+                        </td>
+                        <td th:text="${staff.id}">ST001</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/manager/manager-nav.js}"></script>
+</body>
+</html>

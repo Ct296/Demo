@@ -1,0 +1,6 @@
+python -m venv .venv
+.\.venv\Scripts\Activate
+python -m pip install -r requirements.txt
+python scripts/run_pipeline.py
+python scripts/train.py --input data/processed/prepared_normalized.csv
+python scripts/test_cli.py --text "nhan vien than thien nhung phong hoi va chat"

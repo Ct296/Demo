@@ -1,0 +1,59 @@
+{
+  "negative": {
+    "precision": 0.75,
+    "recall": 0.8067226890756303,
+    "f1-score": 0.7773279352226721,
+    "support": 119.0
+  },
+  "neutral": {
+    "precision": 0.14285714285714285,
+    "recall": 0.05555555555555555,
+    "f1-score": 0.08,
+    "support": 18.0
+  },
+  "positive": {
+    "precision": 0.9397849462365592,
+    "recall": 0.9438444924406048,
+    "f1-score": 0.9418103448275862,
+    "support": 463.0
+  },
+  "accuracy": 0.89,
+  "macro avg": {
+    "precision": 0.6108806963645673,
+    "recall": 0.6020409123572635,
+    "f1-score": 0.5997127600167528,
+    "support": 600.0
+  },
+  "weighted avg": {
+    "precision": 0.8782364311315924,
+    "recall": 0.89,
+    "f1-score": 0.8833336899111172,
+    "support": 600.0
+  },
+  "best_model": "logreg",
+  "best_model_display_name": "LogisticRegression",
+  "macro_f1": 0.5997127600167528,
+  "weighted_f1": 0.8833336899111172,
+  "confusion_matrix": [
+    [
+      96,
+      3,
+      20
+    ],
+    [
+      9,
+      1,
+      8
+    ],
+    [
+      23,
+      3,
+      437
+    ]
+  ],
+  "labels": [
+    "negative",
+    "neutral",
+    "positive"
+  ]
+}

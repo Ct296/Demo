@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ khách hàng - ITHotel</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/image/logofavicon.ico}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
+    <style>
+        :root {
+            --cp-bg: #eef2f7;
+            --cp-surface: #ffffff;
+            --cp-surface-soft: #f8fafc;
+            --cp-text: #0f172a;
+            --cp-muted: #64748b;
+            --cp-border: rgba(15, 23, 42, 0.08);
+            --cp-primary: #5b3df5;
+            --cp-primary-2: #2a0d68;
+            --cp-sidebar-bg: linear-gradient(180deg, #16043e 0%, #24005c 55%, #120033 100%);
+            --cp-sidebar-item: rgba(255,255,255,0.10);
+            --cp-sidebar-item-hover: rgba(255,255,255,0.16);
+            --cp-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            --cp-radius-xl: 28px;
+            --cp-radius-lg: 22px;
+            --cp-radius-md: 16px;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body.customer-profile-page {
+            margin: 0;
+            background: var(--cp-bg);
+            color: var(--cp-text);
+            font-family: inherit;
+        }
+
+        .customer-profile-layout {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            min-height: 100vh;
+        }
+
+        .customer-profile-sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            background: var(--cp-sidebar-bg);
+            color: #fff;
+            padding: 22px 18px 24px;
+            box-shadow: 8px 0 30px rgba(10, 10, 35, 0.18);
+            overflow-y: auto;
+        }
+
+        .customer-profile-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 8px 18px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .customer-profile-brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(91, 61, 245, 0.22);
+            color: #fff;
+            font-size: 1.15rem;
+        }
+
+        .customer-profile-brand-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+        }
+
+        .customer-profile-brand-subtitle {
+            margin: 2px 0 0;
+            color: rgba(255,255,255,0.72);
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        .customer-profile-user-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 24px;
+            padding: 22px 18px;
+            text-align: center;
+            margin: 18px 0 22px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .customer-profile-user-avatar {
+            width: 104px;
+            height: 104px;
+            min-width: 104px;
+            min-height: 104px;
+            max-width: 104px;
+            max-height: 104px;
+            border-radius: 999px;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 16px;
+            border: 4px solid rgba(255,255,255,0.20);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+            background: rgba(255,255,255,0.12);
+        }
+
+        .customer-profile-user-name {
+            font-size: 1.05rem;
+            font-weight: 800;
+            line-height: 1.35;
+            margin: 0 0 4px;
+            word-break: break-word;
+        }
+
+        .customer-profile-user-email {
+            margin: 0;
+            font-size: 0.94rem;
+            color: rgba(255,255,255,0.78);
+            word-break: break-word;
+        }
+
+        .customer-profile-user-tier {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(255, 199, 0, 0.12);
+            border: 1px solid rgba(255, 199, 0, 0.25);
+            color: #ffd24d;
+            font-weight: 800;
+            font-size: 0.96rem;
+        }
+
+        .customer-profile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .customer-profile-nav-btn,
+        .customer-profile-nav-link,
+        .customer-profile-logout-form button {
+            width: 100%;
+            border: 0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-radius: 20px;
+            padding: 16px 18px;
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.3;
+            transition: all 0.2s ease;
+            background: transparent;
+            color: rgba(255,255,255,0.92);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .customer-profile-nav-btn:hover,
+        .customer-profile-nav-link:hover,
+        .customer-profile-logout-form button:hover {
+            background: var(--cp-sidebar-item-hover);
+            color: #fff;
+        }
+
+        .customer-profile-nav-btn.is-active {
+            background: rgba(255,255,255,0.16);
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        .customer-profile-nav-btn i,
+        .customer-profile-nav-link i,
+        .customer-profile-logout-form button i {
+            width: 22px;
+            text-align: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .customer-profile-logout-form {
+            margin: 0;
+        }
+
+        .customer-profile-logout-form button {
+            color: #ffab9c;
+        }
+
+        .customer-profile-main {
+            min-width: 0;
+            padding: 32px;
+        }
+
+        .customer-profile-mobile-topbar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .customer-profile-mobile-toggle {
+            border: 0;
+            background: var(--cp-primary);
+            color: #fff;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 24px rgba(91, 61, 245, 0.24);
+        }
+
+        .customer-profile-mobile-home {
+            text-decoration: none;
+            color: var(--cp-primary);
+            font-weight: 800;
+        }
+
+        .customer-profile-hero {
+            background: var(--cp-surface);
+            border: 1px solid var(--cp-border);
+            border-radius: 32px;
+            padding: 28px 32px;
+            box-shadow: var(--cp-shadow);
+            margin-bottom: 24px;
+        }
+
+        .customer-profile-hero h1 {
+            margin: 0 0 8px;
+            font-size: clamp(2rem, 3vw, 3.15rem);
+            line-height: 1.08;
+            font-weight: 900;
+            color: #12133f;
+        }
+
+        .customer-profile-hero p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: var(--cp-muted);
+        }
+
+        .customer-profile-alerts {
+            margin-bottom: 18px;
+        }
+
+        .customer-profile-pane {
+            display: none;
+        }
+
+        .customer-profile-pane.is-active {
+            display: block;
+        }
+
+        .customer-profile-card {
+            background: var(--cp-surface);
+            border: 1px solid var(--cp-border);
+            border-radius: 30px;
+            box-shadow: var(--cp-shadow);
+            padding: 28px;
+        }
+
+        .customer-profile-card-title {
+            margin: 0 0 26px;
+            font-size: clamp(1.6rem, 2.5vw, 2.8rem);
+            line-height: 1.1;
+            font-weight: 900;
+            color: #12133f;
+        }
+
+        .customer-profile-field-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #434b61;
+        }
+
+        .customer-profile-readonly,
+        .customer-profile-card .form-control,
+        .customer-profile-card .form-select {
+            min-height: 54px;
+            border-radius: 16px;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: none;
+        }
+
+        .customer-profile-readonly {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            background: #f8fafc;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+        .customer-profile-card .form-control:focus,
+        .customer-profile-card .form-select:focus {
+            border-color: rgba(91, 61, 245, 0.45);
+            box-shadow: 0 0 0 0.22rem rgba(91, 61, 245, 0.12);
+        }
+
+        .customer-profile-submit-btn {
+            min-height: 50px;
+            border-radius: 14px;
+            padding: 0 24px;
+            font-weight: 800;
+        }
+
+        .customer-profile-password-toggle {
+            min-width: 52px;
+            border-radius: 0 16px 16px 0;
+        }
+
+        .customer-profile-card .input-group > .form-control {
+            border-radius: 16px 0 0 16px;
+        }
+
+        .customer-profile-table-wrap {
+            overflow-x: auto;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 18px;
+        }
+
+        .customer-profile-table {
+            margin: 0;
+            min-width: 980px;
+        }
+
+        .customer-profile-table thead th {
+            background: #f8fafc;
+            color: #44506b;
+            font-size: 0.95rem;
+            font-weight: 800;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+        }
+
+        .customer-profile-table td,
+        .customer-profile-table th {
+            vertical-align: middle;
+            padding: 14px 16px;
+        }
+
+        .customer-profile-empty {
+            border: 1px dashed rgba(15, 23, 42, 0.12);
+            border-radius: 18px;
+            background: #fbfcfe;
+            color: #64748b;
+            padding: 16px 18px;
+            margin: 0;
+        }
+
+        .customer-profile-section-subtitle {
+            margin: 0 0 14px;
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+
+        .customer-profile-mobile-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 1199.98px) {
+            .customer-profile-layout {
+                grid-template-columns: 280px minmax(0, 1fr);
+            }
+
+            .customer-profile-main {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .customer-profile-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .customer-profile-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: min(320px, calc(100vw - 36px));
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                z-index: 1045;
+            }
+
+            .customer-profile-sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .customer-profile-mobile-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.38);
+                z-index: 1040;
+            }
+
+            .customer-profile-mobile-backdrop.is-open {
+                display: block;
+            }
+
+            .customer-profile-main {
+                padding: 18px;
+            }
+
+            .customer-profile-mobile-topbar {
+                display: flex;
+            }
+
+            .customer-profile-hero,
+            .customer-profile-card {
+                border-radius: 24px;
+                padding: 22px 18px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .customer-profile-brand-title {
+                font-size: 1.4rem;
+            }
+
+            .customer-profile-user-avatar {
+                width: 92px;
+                height: 92px;
+                min-width: 92px;
+                min-height: 92px;
+                max-width: 92px;
+                max-height: 92px;
+            }
+
+            .customer-profile-nav-btn,
+            .customer-profile-nav-link,
+            .customer-profile-logout-form button {
+                padding: 14px 16px;
+                font-size: 0.96rem;
+            }
+
+            .customer-profile-card-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="customer-profile-page">
+
+<div class="customer-profile-mobile-backdrop" id="customerProfileBackdrop"></div>
+
+<div class="customer-profile-layout">
+    <aside class="customer-profile-sidebar" id="customerProfileSidebar">
+        <div class="customer-profile-brand">
+            <span class="customer-profile-brand-icon">
+                <i class="fas fa-hotel"></i>
+            </span>
+            <div>
+                <h2 class="customer-profile-brand-title">ITHotel</h2>
+                <p class="customer-profile-brand-subtitle">Khách hàng</p>
+            </div>
+        </div>
+
+        <div class="customer-profile-user-card">
+            <img th:src="${@mediaViewSupport.resolveAvatarPath(currentUser != null ? currentUser.avatar : null)}"
+                 th:attr="onerror=|this.onerror=null;this.src='@{/image/default_avatar_customer.jpg}';|"
+                 alt="Avatar"
+                 class="customer-profile-user-avatar">
+
+            <h3 class="customer-profile-user-name"
+                th:text="${currentUser != null ? currentUser.lastName + ' ' + currentUser.firstName : 'Khách hàng'}">
+                Nguyễn Văn A
+            </h3>
+
+            <p class="customer-profile-user-email"
+               th:text="${currentUser != null ? currentUser.email : 'customer@example.com'}">
+                customer@example.com
+            </p>
+
+            <div class="customer-profile-user-tier">
+                <i class="fas fa-crown"></i>
+                <span th:text="${currentTier != null ? currentTier.name : 'Thành viên mới'}">Gold</span>
+            </div>
+        </div>
+
+        <nav class="customer-profile-nav">
+            <button type="button"
+                    class="customer-profile-nav-btn is-active"
+                    data-tab-target="overview">
+                <i class="fas fa-gauge-high"></i>
+                <span>Tổng quan</span>
+            </button>
+
+            <button type="button"
+                    class="customer-profile-nav-btn"
+                    data-tab-target="edit-profile">
+                <i class="fas fa-user-pen"></i>
+                <span>Cập nhật hồ sơ</span>
+            </button>
+
+            <button type="button"
+                    class="customer-profile-nav-btn"
+                    data-tab-target="change-password">
+                <i class="fas fa-key"></i>
+                <span>Cập nhật mật khẩu</span>
+            </button>
+
+            <button type="button"
+                    class="customer-profile-nav-btn"
+                    data-tab-target="bookings">
+                <i class="fas fa-calendar-check"></i>
+                <span>Booking / Thuê phòng</span>
+            </button>
+
+            <button type="button"
+                    class="customer-profile-nav-btn"
+                    data-tab-target="billing">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Thanh toán / Hóa đơn</span>
+            </button>
+
+            <a class="customer-profile-nav-link" th:href="@{/customer/home}">
+                <i class="fas fa-house"></i>
+                <span>Về trang chủ</span>
+            </a>
+
+            <form th:action="@{/logout}" method="post" class="customer-profile-logout-form">
+                <button type="submit">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="customer-profile-main">
+        <div class="customer-profile-mobile-topbar">
+            <button type="button" class="customer-profile-mobile-toggle" id="customerProfileToggle" aria-label="Mở menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <a class="customer-profile-mobile-home" th:href="@{/customer/home}">
+                <i class="fas fa-house me-1"></i>Trang chủ
+            </a>
+        </div>
+
+        <section class="customer-profile-hero">
+            <h1>Hồ sơ khách hàng</h1>
+            <p>Quản lý thông tin cá nhân, lịch sử booking, hóa đơn và thanh toán của bạn.</p>
+        </section>
+
+        <div class="customer-profile-alerts">
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+
+        <section class="customer-profile-pane is-active" id="overview">
+            <div class="customer-profile-card">
+                <h2 class="customer-profile-card-title">Thông tin tài khoản</h2>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Họ và tên</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null ? currentUser.lastName + ' ' + currentUser.firstName : 'N/A'}">
+                            Nguyễn Văn A
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Email</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null ? currentUser.email : 'N/A'}">
+                            email@example.com
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Số điện thoại</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.phoneNumber != null ? currentUser.phoneNumber : 'Chưa cập nhật'}">
+                            0901000008
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">CCCD / CMND / Hộ chiếu</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.pid != null ? currentUser.pid : 'Chưa cập nhật'}">
+                            100000000008
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Quốc tịch</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.nationality != null ? currentUser.nationality : 'Chưa cập nhật'}">
+                            Vietnam
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Giới tính</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.sex != null ? currentUser.sex.name() : 'Chưa cập nhật'}">
+                            MALE
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Ngày sinh</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.dateOfBirth != null ? #temporals.format(currentUser.dateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">
+                            08/08/2000
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Hạng khách hàng hiện tại</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentTier != null ? currentTier.name : 'Thành viên mới'}">
+                            Gold
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Ngày tạo tài khoản</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.createDate != null ? #temporals.format(currentUser.createDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                            18/03/2026 01:44
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Cập nhật gần nhất</label>
+                        <div class="customer-profile-readonly"
+                             th:text="${currentUser != null and currentUser.updateDate != null ? #temporals.format(currentUser.updateDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                            18/03/2026 01:44
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="customer-profile-pane" id="edit-profile">
+            <div class="customer-profile-card">
+                <h2 class="customer-profile-card-title">Cập nhật hồ sơ</h2>
+
+                <form th:action="@{/customer/profile/update}" method="post" enctype="multipart/form-data" class="row g-3" id="customerProfileUpdateForm">
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Họ</label>
+                        <input type="text"
+                               name="lastName"
+                               class="form-control"
+                               maxlength="30"
+                               th:value="${currentUser != null ? currentUser.lastName : ''}"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Tên</label>
+                        <input type="text"
+                               name="firstName"
+                               class="form-control"
+                               maxlength="30"
+                               th:value="${currentUser != null ? currentUser.firstName : ''}"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Số điện thoại</label>
+                        <input type="text"
+                               name="phoneNumber"
+                               class="form-control"
+                               maxlength="11"
+                               th:value="${currentUser != null ? currentUser.phoneNumber : ''}"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">CCCD / CMND / Hộ chiếu</label>
+                        <input type="text"
+                               name="pid"
+                               class="form-control"
+                               maxlength="20"
+                               th:value="${currentUser != null ? currentUser.pid : ''}"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Quốc tịch</label>
+                        <select name="nationality"
+                                class="form-select"
+                                data-country-select
+                                th:attr="data-selected-country=${currentUser != null ? currentUser.nationality : ''}"
+                                data-placeholder="-- Chọn quốc tịch --">
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Giới tính</label>
+                        <select name="sex" class="form-select" required>
+                            <option value="MALE"
+                                    th:selected="${currentUser != null and currentUser.sex != null and currentUser.sex.name() == 'MALE'}">
+                                [[${T(com.hotel.system.entity.enums.Gender).MALE.displayName}]]
+                            </option>
+                            <option value="FEMALE"
+                                    th:selected="${currentUser != null and currentUser.sex != null and currentUser.sex.name() == 'FEMALE'}">
+                                [[${T(com.hotel.system.entity.enums.Gender).FEMALE.displayName}]]
+                            </option>
+                            <option value="UNSPECIFIED"
+                                    th:selected="${currentUser != null and currentUser.sex != null and currentUser.sex.name() == 'UNSPECIFIED'}">
+                                [[${T(com.hotel.system.entity.enums.Gender).UNSPECIFIED.displayName}]]
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Ngày sinh</label>
+                        <input type="date"
+                               name="dateOfBirth"
+                               class="form-control"
+                               th:value="${currentUser != null and currentUser.dateOfBirth != null ? currentUser.dateOfBirth : ''}"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Ảnh đại diện</label>
+                        <input type="file"
+                               name="avatarFile"
+                               id="customerAvatarFile"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                        <div class="form-text">Chỉ chấp nhận JPG, PNG, WEBP. Tối đa 2MB.</div>
+                        <div class="text-danger small mt-2 d-none" id="customerAvatarFileError"></div>
+                    </div>
+
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-primary customer-profile-submit-btn">
+                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="customer-profile-pane" id="change-password">
+            <div class="customer-profile-card">
+                <h2 class="customer-profile-card-title">Cập nhật mật khẩu</h2>
+
+                <form th:action="@{/customer/profile/change-password}" method="post" class="row g-3">
+                    <div class="col-12">
+                        <label class="customer-profile-field-label">Mật khẩu hiện tại</label>
+                        <div class="input-group">
+                            <input type="password" name="oldPass" id="oldPass" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary customer-profile-password-toggle toggle-password" data-target="oldPass">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Mật khẩu mới</label>
+                        <div class="input-group">
+                            <input type="password" name="newPass" id="newPass" class="form-control" minlength="8" maxlength="255" required>
+                            <button type="button" class="btn btn-outline-secondary customer-profile-password-toggle toggle-password" data-target="newPass">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="customer-profile-field-label">Xác nhận mật khẩu mới</label>
+                        <div class="input-group">
+                            <input type="password" name="confirmPass" id="confirmPass" class="form-control" minlength="8" maxlength="255" required>
+                            <button type="button" class="btn btn-outline-secondary customer-profile-password-toggle toggle-password" data-target="confirmPass">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-warning customer-profile-submit-btn">
+                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="customer-profile-pane" id="bookings">
+            <div class="customer-profile-card">
+                <h2 class="customer-profile-card-title">Booking / Thuê phòng</h2>
+
+                <div th:if="${rentals == null or rentals.isEmpty()}" class="customer-profile-empty">
+                    Bạn chưa có lượt đặt phòng hoặc thuê phòng nào.
+                </div>
+
+                <div th:if="${rentals != null and !rentals.isEmpty()}" class="customer-profile-table-wrap">
+                    <table class="table table-bordered table-hover align-middle customer-profile-table">
+                        <thead>
+                        <tr>
+                            <th>Mã thuê</th>
+                            <th>Phòng</th>
+                            <th>Loại</th>
+                            <th>Ngày nhận</th>
+                            <th>Thời lượng</th>
+                            <th>Dự kiến trả</th>
+                            <th>Số khách</th>
+                            <th>Hình thức</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="rental : ${rentals}">
+                            <td th:text="${rental.id}">REN0000001</td>
+                            <td th:text="${rental.room != null ? rental.room.name : 'N/A'}">101</td>
+                            <td th:text="${rental.room != null and rental.room.roomType != null ? rental.room.roomType.name : 'N/A'}">Standard</td>
+                            <td th:text="${rental.checkinDate != null ? #temporals.format(rental.checkinDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">20/03/2026 14:00</td>
+                            <td th:text="${(rental.lengthOfStay != null ? rental.lengthOfStay : 0) + ' giờ'}">48 giờ</td>
+                            <td th:text="${@customerController.calculateExpectedCheckout(rental) != null ? #temporals.format(@customerController.calculateExpectedCheckout(rental), 'dd/MM/yyyy HH:mm') : 'N/A'}">22/03/2026 14:00</td>
+                            <td th:text="${rental.guestCount != null ? rental.guestCount : 0}">2</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${rental.isBooking != null and rental.isBooking} ? ' text-bg-info' : ' text-bg-secondary'"
+                                      th:text="${rental.isBooking != null and rental.isBooking ? 'Đặt trước' : 'Thuê trực tiếp'}">
+                                    Đặt trước
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${
+                                        rental.status != null and rental.status.name() == 'PENDING' ? ' text-bg-warning' :
+                                        (rental.status != null and rental.status.name() == 'CONFIRMED' ? ' text-bg-primary' :
+                                        (rental.status != null and rental.status.name() == 'CHECKED_IN' ? ' text-bg-success' :
+                                        (rental.status != null and rental.status.name() == 'OVERDUE' ? ' text-bg-danger' :
+                                        (rental.status != null and rental.status.name() == 'CHECKED_OUT' ? ' text-bg-dark' : ' text-bg-danger'))))
+                                      }"
+                                      th:text="${rental.status != null ? rental.status.displayName : 'N/A'}">
+                                    Chờ xác nhận
+                                </span>
+
+                                <div class="small text-warning mt-1"
+                                     th:if="${@customerController.isNearCheckout(rental, 15)}"
+                                     th:text="${'Còn ' + @customerController.calculateRemainingMinutes(rental) + ' phút nữa sẽ hết thời gian thuê. Vui lòng liên hệ lễ tân nếu cần hỗ trợ.'}">
+                                    Còn 15 phút nữa sẽ hết thời gian thuê.
+                                </div>
+
+                                <div class="small text-danger mt-1"
+                                     th:if="${rental.status != null and rental.status.name() == 'OVERDUE'}"
+                                     th:text="${'Đơn thuê đã quá hạn ' + @customerController.calculateOverdueMinutes(rental) + ' phút. Vui lòng liên hệ ngay lễ tân để xử lý gia hạn hoặc check-out.'}">
+                                    Đơn thuê đã quá hạn.
+                                </div>
+                            </td>
+                            <td>
+                                <div th:if="${rental.isBooking != null and rental.isBooking and rental.status != null and (rental.status.name() == 'PENDING' or rental.status.name() == 'CONFIRMED')}">
+                                    <a th:if="${rental.status.name() == 'PENDING'}"
+                                       th:href="@{/customer/booking/payment(rentalId=${rental.id})}"
+                                       class="btn btn-sm btn-outline-primary mb-2">
+                                        Thanh toán cọc
+                                    </a>
+
+                                    <form th:if="${rental.status.name() == 'PENDING'}"
+                                          th:action="@{/customer/rentals/cancel}"
+                                          method="post"
+                                          class="d-inline">
+                                        <input type="hidden" name="rentalId" th:value="${rental.id}">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Bạn có chắc muốn hủy booking này?');">
+                                            Hủy booking
+                                        </button>
+                                    </form>
+
+                                    <form th:if="${rental.status.name() == 'CONFIRMED'}"
+                                          th:action="@{/customer/rentals/cancel}"
+                                          method="post"
+                                          class="d-inline">
+                                        <input type="hidden" name="rentalId" th:value="${rental.id}">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Booking đã xác nhận khi hủy sẽ mất toàn bộ tiền cọc. Bạn có chắc muốn hủy?');">
+                                            Hủy booking
+                                        </button>
+                                    </form>
+
+                                    <div th:if="${rental.status.name() == 'CONFIRMED'}" class="small text-warning mt-1">
+                                        Hủy booking này sẽ mất toàn bộ tiền cọc
+                                    </div>
+                                </div>
+
+                                <span th:if="${!(rental.isBooking != null and rental.isBooking and rental.status != null and (rental.status.name() == 'PENDING' or rental.status.name() == 'CONFIRMED'))}"
+                                      class="text-muted small">
+                                    Không khả dụng
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="customer-profile-pane" id="billing">
+            <div class="customer-profile-card">
+                <h2 class="customer-profile-card-title">Thanh toán / Hóa đơn</h2>
+
+                <div class="mb-4">
+                    <p class="customer-profile-section-subtitle text-primary">Danh sách hóa đơn</p>
+
+                    <div th:if="${bills == null or bills.isEmpty()}" class="customer-profile-empty">
+                        Chưa có hóa đơn nào.
+                    </div>
+
+                    <div th:if="${bills != null and !bills.isEmpty()}" class="customer-profile-table-wrap">
+                        <table class="table table-bordered table-hover align-middle customer-profile-table">
+                            <thead>
+                            <tr>
+                                <th>Mã hóa đơn</th>
+                                <th>Mã thuê</th>
+                                <th>Loại</th>
+                                <th>Ngày tạo</th>
+                                <th>Tổng tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="bill : ${bills}">
+                                <td th:text="${bill.id}">BIL000001</td>
+                                <td th:text="${bill.rental != null ? bill.rental.id : 'N/A'}">REN0000001</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${bill.type != null and bill.type.name() == 'DEPOSIT'} ? ' text-bg-primary' : ' text-bg-danger'"
+                                          th:text="${bill.type != null ? bill.type.displayName : 'N/A'}">
+                                        Tiền cọc
+                                    </span>
+                                </td>
+                                <td th:text="${bill.createDate != null ? #temporals.format(bill.createDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">20/03/2026 10:00</td>
+                                <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">1.000.000 đ</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="customer-profile-section-subtitle text-success">Danh sách thanh toán</p>
+
+                    <div th:if="${payments == null or payments.isEmpty()}" class="customer-profile-empty">
+                        Chưa có thanh toán nào.
+                    </div>
+
+                    <div th:if="${payments != null and !payments.isEmpty()}" class="customer-profile-table-wrap">
+                        <table class="table table-bordered table-hover align-middle customer-profile-table">
+                            <thead>
+                            <tr>
+                                <th>Mã thanh toán</th>
+                                <th>Mã hóa đơn</th>
+                                <th>Phương thức</th>
+                                <th>Ngày thanh toán</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="payment : ${payments}">
+                                <td th:text="${payment.transaction != null ? payment.transaction : 'N/A'}">BANK-ABCD1234</td>
+                                <td th:text="${payment.bill != null ? payment.bill.id : 'N/A'}">BIL000001</td>
+                                <td th:text="${payment.method != null ? payment.method.displayName : 'N/A'}">Chuyển khoản</td>
+                                <td th:text="${payment.date != null ? #temporals.format(payment.date, 'dd/MM/yyyy HH:mm') : 'N/A'}">20/03/2026 10:05</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/common/country-select.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const navButtons = document.querySelectorAll('.customer-profile-nav-btn[data-tab-target]');
+        const panes = document.querySelectorAll('.customer-profile-pane');
+        const sidebar = document.getElementById('customerProfileSidebar');
+        const backdrop = document.getElementById('customerProfileBackdrop');
+        const toggle = document.getElementById('customerProfileToggle');
+        const avatarInput = document.getElementById('customerAvatarFile');
+        const avatarError = document.getElementById('customerAvatarFileError');
+        const updateForm = document.getElementById('customerProfileUpdateForm');
+
+        function closeMobileSidebar() {
+            if (sidebar) {
+                sidebar.classList.remove('is-open');
+            }
+            if (backdrop) {
+                backdrop.classList.remove('is-open');
+            }
+        }
+
+        function openMobileSidebar() {
+            if (sidebar) {
+                sidebar.classList.add('is-open');
+            }
+            if (backdrop) {
+                backdrop.classList.add('is-open');
+            }
+        }
+
+        function activatePane(tabId, syncHash) {
+            const targetPane = document.getElementById(tabId);
+            if (!targetPane) {
+                return;
+            }
+
+            navButtons.forEach(function (button) {
+                button.classList.toggle('is-active', button.getAttribute('data-tab-target') === tabId);
+            });
+
+            panes.forEach(function (pane) {
+                pane.classList.toggle('is-active', pane.id === tabId);
+            });
+
+            if (syncHash && window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', '#' + tabId);
+            }
+
+            closeMobileSidebar();
+        }
+
+        navButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const tabId = this.getAttribute('data-tab-target');
+                activatePane(tabId, true);
+            });
+        });
+
+        const validIds = Array.from(panes).map(function (pane) {
+            return pane.id;
+        });
+        const currentHash = window.location.hash ? window.location.hash.substring(1) : '';
+        if (currentHash && validIds.includes(currentHash)) {
+            activatePane(currentHash, false);
+        } else {
+            activatePane('overview', false);
+        }
+
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                if (sidebar && sidebar.classList.contains('is-open')) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
+            });
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeMobileSidebar);
+        }
+
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+
+                if (!input || !icon) {
+                    return;
+                }
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        function validateAvatarFile() {
+            if (!avatarInput || !avatarError) {
+                return true;
+            }
+
+            avatarError.classList.add('d-none');
+            avatarError.textContent = '';
+
+            if (avatarInput.files && avatarInput.files.length > 0) {
+                const file = avatarInput.files[0];
+                const maxSize = 2 * 1024 * 1024;
+
+                if (file.size > maxSize) {
+                    avatarError.textContent = 'Ảnh đại diện không được vượt quá 2MB.';
+                    avatarError.classList.remove('d-none');
+                    avatarInput.value = '';
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (avatarInput) {
+            avatarInput.addEventListener('change', validateAvatarFile);
+        }
+
+        if (updateForm) {
+            updateForm.addEventListener('submit', function (event) {
+                if (!validateAvatarFile()) {
+                    event.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

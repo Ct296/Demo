@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - ITHotel</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/image/logofavicon.ico}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/staff/staff.css}">
+</head>
+<body class="manager-body">
+
+<div class="manager-shell">
+    <aside class="manager-sidebar">
+        <div class="manager-brand">
+            <div class="manager-brand-icon">
+                <i class="fas fa-bell-concierge"></i>
+            </div>
+            <div>
+                <div class="manager-brand-title">ITHotel Staff</div>
+                <div class="manager-brand-subtitle"
+                     th:text="${currentUser != null ? currentUser.lastName + ' ' + currentUser.firstName : 'Nhân viên lễ tân'}">
+                    Nhân viên lễ tân
+                </div>
+            </div>
+        </div>
+
+        <nav class="manager-nav">
+            <a href="#overview-section" class="manager-link active">
+                <i class="fas fa-gauge-high"></i>
+                <span>Tổng quan</span>
+            </a>
+            <a href="#room-timeline-section" class="manager-link">
+                <i class="fas fa-table-cells-large"></i>
+                <span>Bảng phòng 24 giờ</span>
+            </a>
+            <a href="#walkin-section" class="manager-link">
+                <i class="fas fa-person-walking-luggage"></i>
+                <span>Khách đến trực tiếp</span>
+            </a>
+            <a href="#pending-booking-section" class="manager-link">
+                <i class="fas fa-hourglass-half"></i>
+                <span>Booking chờ xử lý</span>
+            </a>
+            <a href="#arrival-section" class="manager-link">
+                <i class="fas fa-door-open"></i>
+                <span>Khách đến hôm nay</span>
+            </a>
+            <a href="#checkedin-section" class="manager-link">
+                <i class="fas fa-bed"></i>
+                <span>Khách đang ở</span>
+            </a>
+            <a href="#checkout-section" class="manager-link">
+                <i class="fas fa-receipt"></i>
+                <span>Check-out & hóa đơn</span>
+            </a>
+            <a href="#history-section" class="manager-link">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>Lịch sử dịch vụ / thanh toán</span>
+            </a>
+            <a th:href="@{/staff/profile}" class="manager-link">
+                <i class="fas fa-id-card"></i>
+                <span>Hồ sơ</span>
+            </a>
+
+            <form th:action="@{/logout}" method="post" class="mt-3">
+                <button type="submit" class="manager-link staff-link-button text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="manager-content">
+        <section class="manager-page-header">
+            <div>
+                <h1>Trang nghiệp vụ lễ tân</h1>
+                <p>Xử lý booking online, khách đến trực tiếp theo giờ, check-in, thêm dịch vụ, check-out và theo dõi thanh toán cuối.</p>
+            </div>
+        </section>
+
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <section id="overview-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Tổng quan lễ tân</h2>
+                <p>Thông tin nhanh về booking, khách đến và khách đang lưu trú.</p>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-warning">
+                        <div class="stat-label">Booking chờ xử lý</div>
+                        <div class="stat-value" th:text="${pendingBookingCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-primary">
+                        <div class="stat-label">Booking đã xác nhận</div>
+                        <div class="stat-value" th:text="${confirmedBookingCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-success">
+                        <div class="stat-label">Khách đang ở</div>
+                        <div class="stat-value" th:text="${checkedInCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="stat-box stat-danger">
+                        <div class="stat-label">Đã check-out</div>
+                        <div class="stat-value" th:text="${checkedOutCount}">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="room-timeline-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Bảng phòng 24 giờ tới</h2>
+                <p>Timeline theo từng phòng, chia mỗi ô 30 phút để staff nhìn nhanh phòng nào đang bị chặn, đang dọn dẹp và trống sớm nhất.</p>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-lg-4 col-sm-6">
+                    <div class="stat-box stat-success">
+                        <div class="stat-label">Trống ngay</div>
+                        <div class="stat-value" th:text="${availableNowRoomCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="stat-box stat-warning">
+                        <div class="stat-label">Đang bị chặn / dọn dẹp</div>
+                        <div class="stat-value" th:text="${busyNowRoomCount}">0</div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12">
+                    <div class="stat-box stat-danger">
+                        <div class="stat-label">Đang bảo trì</div>
+                        <div class="stat-value" th:text="${maintenanceRoomCount}">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-legend">
+                <span class="timeline-legend-item timeline-legend-available">Trống</span>
+                <span class="timeline-legend-item timeline-legend-pending">Chờ xác nhận</span>
+                <span class="timeline-legend-item timeline-legend-confirmed">Đã xác nhận</span>
+                <span class="timeline-legend-item timeline-legend-checkedin">Đang ở</span>
+                <span class="timeline-legend-item timeline-legend-overdue">Quá hạn</span>
+                <span class="timeline-legend-item timeline-legend-cleaning">Dọn dẹp</span>
+                <span class="timeline-legend-item timeline-legend-maintenance">Bảo trì</span>
+            </div>
+
+            <div class="table-note mb-3">
+                <span class="fw-semibold">Khung hiển thị:</span>
+                <span th:text="${timelineStart != null ? #temporals.format(timelineStart, 'dd/MM/yyyy HH:mm') : 'N/A'}">21/03/2026 11:00</span>
+                <span>→</span>
+                <span th:text="${timelineEnd != null ? #temporals.format(timelineEnd, 'dd/MM/yyyy HH:mm') : 'N/A'}">22/03/2026 11:00</span>
+            </div>
+
+            <div class="table-responsive staff-timeline-wrapper">
+                <table class="table table-bordered align-middle staff-room-timeline-table">
+                    <thead>
+                    <tr>
+                        <th class="staff-room-info-col sticky-col">Phòng</th>
+                        <th class="staff-room-state-col sticky-col-2">Trạng thái hiện tại</th>
+                        <th class="staff-room-available-col sticky-col-3">Trống nhanh nhất</th>
+                        <th th:each="slot : ${roomTimelineSlots}"
+                            class="staff-time-slot-col"
+                            th:text="${slot.label}">
+                            11:00
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${roomTimelineRows == null || roomTimelineRows.isEmpty()}">
+                        <td colspan="60">
+                            <div class="empty-box text-center">Chưa có dữ liệu phòng để hiển thị timeline.</div>
+                        </td>
+                    </tr>
+                    <tr th:each="row : ${roomTimelineRows}">
+                        <td class="sticky-col timeline-room-info">
+                            <div class="fw-semibold" th:text="${row.room != null ? row.room.name : 'N/A'}">101</div>
+                            <div class="small text-muted"
+                                 th:text="${row.room != null && row.room.roomType != null ? row.room.roomType.name : 'N/A'}">
+                                Standard
+                            </div>
+                            <div class="small text-muted"
+                                 th:text="${row.room != null ? row.room.status.displayName : 'N/A'}">
+                                Sẵn sàng
+                            </div>
+                        </td>
+                        <td class="sticky-col-2 timeline-room-state">
+                            <span class="staff-status-badge"
+                                  th:classappend="${row.maintenanceRoom} ? ' staff-status-cancelled' : (${row.availableNow} ? ' staff-status-checkedin' : ' staff-status-pending')"
+                                  th:text="${row.currentStateLabel}">
+                                Trống ngay
+                            </span>
+                        </td>
+                        <td class="sticky-col-3 timeline-room-available">
+                            <div class="fw-semibold" th:text="${row.nextAvailableLabel}">Ngay bây giờ</div>
+                        </td>
+                        <td th:each="segment : ${row.segments}"
+                            th:colspan="${segment.colspan}"
+                            class="timeline-cell"
+                            th:classappend="' timeline-cell-' + ${segment.cssClass}"
+                            th:title="${segment.tooltip}">
+                            <div class="timeline-cell-content" th:text="${segment.label}">Trống</div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="walkin-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Khách đến trực tiếp tại quầy</h2>
+                <p>Nhập CCCD / CMND / Hộ chiếu của khách cũ để dùng tài khoản sẵn có. Nếu để trống, hệ thống sẽ tạo mới tài khoản khách hàng. Thuê trực tiếp được tính theo giờ.</p>
+            </div>
+
+            <form th:action="@{/staff/walk-in/create}" method="post" class="row g-3">
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Phòng</label>
+                    <select name="roomId" class="form-select" required>
+                        <option value="">-- Chọn phòng --</option>
+                        <option th:each="room : ${walkInRooms}"
+                                th:value="${room.id}"
+                                th:text="${room.name + ' - ' + (room.roomType != null ? room.roomType.name : 'N/A')}">
+                            101 - Standard
+                        </option>
+                    </select>
+                    <div class="form-text">Danh sách phòng đang lọc theo khung giờ ở nút “Tìm phòng trống”. Hệ thống vẫn kiểm tra lại lần cuối khi tạo đơn.</div>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Số khách</label>
+                    <input type="number" name="guestCount" class="form-control" min="1" value="1" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Số giờ thuê</label>
+                    <input type="number" name="lengthOfStay" class="form-control" min="1" value="1" required>
+                    <div class="form-text">Tối thiểu 1 giờ. Thuê dưới 6 giờ sẽ phụ thu 10%.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Khách hàng cũ (CCCD / CMND / Hộ chiếu)</label>
+                    <input type="text" name="existingCustomerPid" class="form-control" maxlength="20" placeholder="Nhập CCCD / CMND / Hộ chiếu nếu khách đã có tài khoản">
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3">Nếu là khách mới, nhập thông tin bên dưới</h5>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Họ</label>
+                    <input type="text" name="lastName" class="form-control" maxlength="30">
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Tên</label>
+                    <input type="text" name="firstName" class="form-control" maxlength="30">
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" maxlength="50">
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">CCCD / CMND / Hộ chiếu</label>
+                    <input type="text" name="pid" class="form-control" maxlength="20">
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Số điện thoại</label>
+                    <input type="text" name="phoneNumber" class="form-control" maxlength="15">
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Quốc tịch</label>
+                    <select name="nationality"
+                            class="form-select"
+                            data-country-select
+                            data-default-country="Vietnam"
+                            data-placeholder="-- Chọn quốc tịch --">
+                    </select>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Giới tính</label>
+                    <select name="sex" class="form-select">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option th:each="gender : ${genders}"
+                                th:value="${gender.name()}"
+                                th:text="${gender.name()}">
+                            MALE
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Ngày sinh</label>
+                    <input type="date" name="dateOfBirth" class="form-control">
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary"
+                            onclick="return confirm('Xác nhận tạo lượt thuê trực tiếp cho khách này?')">
+                        <i class="fas fa-plus-circle me-2"></i>Tạo lượt thuê trực tiếp
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <section id="pending-booking-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Booking chờ xử lý</h2>
+                <p>Booking online được giữ 30 phút để chờ ghi nhận thanh toán cọc.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Danh sách booking chờ xác nhận</h3>
+                            <span class="subsection-meta">Tự động hết hạn sau 30 phút nếu chưa có tiền cọc</span>
+                        </div>
+
+                        <div th:if="${pendingBookings == null || pendingBookings.isEmpty()}">
+                            <div class="empty-box text-center">Hiện chưa có booking nào đang chờ xử lý.</div>
+                        </div>
+
+                        <div th:if="${pendingBookings != null && !pendingBookings.isEmpty()}" class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Mã booking</th>
+                                    <th>Khách hàng</th>
+                                    <th>Phòng</th>
+                                    <th>Lịch nhận phòng</th>
+                                    <th>Thông tin cọc</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="rental : ${pendingBookings}">
+                                    <td>
+                                        <div class="fw-semibold" th:text="${rental.id}">REN0000001</div>
+                                        <div class="small text-muted"
+                                             th:text="${rental.rentDate != null ? #temporals.format(rental.rentDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                            18/03/2026 10:00
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold"
+                                             th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                            Nguyễn Văn A
+                                        </div>
+                                        <div class="small text-muted"
+                                             th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.email : 'N/A'}">
+                                            customer@example.com
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold" th:text="${rental.room != null ? rental.room.name : 'N/A'}">101</div>
+                                        <div class="small text-muted"
+                                             th:text="${rental.room != null && rental.room.roomType != null ? rental.room.roomType.name : 'N/A'}">
+                                            Standard
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div th:text="${rental.checkinDate != null ? #temporals.format(rental.checkinDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                            20/03/2026 14:00
+                                        </div>
+                                        <div class="small text-muted">
+                                            <span th:text="${rental.lengthOfStay != null ? rental.lengthOfStay : 0}">2</span> giờ
+                                            -
+                                            <span th:text="${rental.guestCount != null ? rental.guestCount : 0}">2</span> khách
+                                        </div>
+                                        <div class="small mt-1" th:if="${rental.note != null && !#strings.isEmpty(rental.note)}">
+                                            <span class="fw-semibold">Ghi chú:</span>
+                                            <span th:text="${rental.note}">Khách muốn phòng yên tĩnh.</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            Cọc dự kiến:
+                                            <span class="fw-semibold"
+                                                  th:text="${#numbers.formatDecimal(@staffController.calculateDepositAmount(rental), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                500.000 đ
+                                            </span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            Đã thu:
+                                            <span th:text="${#numbers.formatDecimal(@staffController.calculateDepositPaid(rental.id), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                0 đ
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="quick-action-group">
+                                            <form th:action="@{'/staff/bookings/' + ${rental.id} + '/cancel'}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Bạn có chắc muốn hủy booking này?')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-xmark me-1"></i>Hủy
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <div class="small mt-2"
+                                             th:classappend="${@staffController.hasPaymentForBillType(rental.id, T(com.hotel.system.entity.enums.BillType).DEPOSIT) ? ' text-success' : ' text-warning'}"
+                                             th:text="${@staffController.hasPaymentForBillType(rental.id, T(com.hotel.system.entity.enums.BillType).DEPOSIT) ? 'Đã thanh toán cọc.' : 'Đang chờ thanh toán cọc.'}">
+                                            Đang chờ thanh toán cọc.
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="arrival-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Khách đến hôm nay</h2>
+                <p>Danh sách booking dự kiến nhận phòng trong ngày hiện tại. Chỉ booking đã xác nhận mới được check-in.</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table">
+                    <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Phòng</th>
+                        <th>Giờ nhận phòng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác nhanh</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${todayArrivals == null || todayArrivals.isEmpty()}">
+                        <td colspan="5">
+                            <div class="empty-box text-center">Hôm nay chưa có khách đến theo lịch booking.</div>
+                        </td>
+                    </tr>
+                    <tr th:each="rental : ${todayArrivals}">
+                        <td>
+                            <div class="fw-bold"
+                                 th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                Trần B
+                            </div>
+                            <div class="small text-muted" th:text="${rental.id}">REN0000002</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold" th:text="${rental.room != null ? rental.room.name : 'N/A'}">201</div>
+                            <div class="small text-muted"
+                                 th:text="${rental.room != null && rental.room.roomType != null ? rental.room.roomType.name : 'N/A'}">
+                                Deluxe
+                            </div>
+                        </td>
+                        <td>
+                            <div th:text="${rental.checkinDate != null ? #temporals.format(rental.checkinDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                18/03/2026 14:00
+                            </div>
+                            <div class="small mt-1" th:if="${rental.note != null && !#strings.isEmpty(rental.note)}">
+                                <span class="fw-semibold">Ghi chú:</span>
+                                <span th:text="${rental.note}">Khách muốn phòng tầng cao.</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="staff-status-badge"
+                                  th:classappend="${
+                                    rental.status != null && rental.status.name() == 'PENDING' ? ' staff-status-pending' :
+                                    (rental.status != null && rental.status.name() == 'CONFIRMED' ? ' staff-status-confirmed' : ' staff-status-checkedin')
+                                  }"
+                                  th:text="${rental.status != null ? rental.status.displayName : 'N/A'}">
+                                Đã xác nhận
+                            </span>
+                        </td>
+                        <td>
+                            <div class="quick-action-group">
+                                <form th:if="${rental.status != null && rental.status.name() == 'CONFIRMED'}"
+                                      th:action="@{'/staff/rentals/' + ${rental.id} + '/check-in'}"
+                                      method="post"
+                                      onsubmit="return confirm('Xác nhận check-in cho booking này?')">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-door-open me-1"></i>Check-in
+                                    </button>
+                                </form>
+
+                                <div th:if="${rental.status != null && rental.status.name() == 'PENDING'}"
+                                     class="small text-muted mt-1">
+                                    Booking đang chờ hệ thống ghi nhận thanh toán cọc.
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="checkedin-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Khách đang ở</h2>
+                <p>Thêm dịch vụ phát sinh và theo dõi thời gian lưu trú. Hệ thống sẽ cảnh báo khi còn 15 phút và tự chuyển sang trạng thái quá hạn khi vượt giờ nhưng không tự check-out.</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table">
+                    <thead>
+                    <tr>
+                        <th>Khách / phòng</th>
+                        <th>Thông tin lưu trú</th>
+                        <th>Dịch vụ phát sinh</th>
+                        <th>Check-out</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${checkedInRentals == null || checkedInRentals.isEmpty()}">
+                        <td colspan="4">
+                            <div class="empty-box text-center">Hiện chưa có khách nào đang lưu trú.</div>
+                        </td>
+                    </tr>
+                    <tr th:each="rental : ${checkedInRentals}">
+                        <td>
+                            <div class="fw-bold"
+                                 th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                Lê C
+                            </div>
+                            <div class="small text-muted">
+                                Mã thuê: <span th:text="${rental.id}">REN0000003</span>
+                            </div>
+                            <div class="small text-muted">
+                                Phòng:
+                                <span th:text="${rental.room != null ? rental.room.name : 'N/A'}">102</span>
+                                -
+                                <span th:text="${rental.room != null && rental.room.roomType != null ? rental.room.roomType.name : 'N/A'}">Standard</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                Nhận phòng:
+                                <span th:text="${rental.checkinDate != null ? #temporals.format(rental.checkinDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">11/03/2026 14:00</span>
+                            </div>
+                            <div class="small text-muted">
+                                Thời lượng:
+                                <span th:text="${(rental.lengthOfStay != null ? rental.lengthOfStay : 0) + ' giờ'}">5 giờ</span>
+                                |
+                                Dự kiến trả phòng:
+                                <span th:text="${@staffController.calculateExpectedCheckout(rental) != null ? #temporals.format(@staffController.calculateExpectedCheckout(rental), 'dd/MM/yyyy HH:mm') : 'N/A'}">11/03/2026 19:00</span>
+                            </div>
+                            <div class="small text-warning mt-1"
+                                 th:if="${@staffController.isNearCheckout(rental, 15)}"
+                                 th:text="${'Còn ' + @staffController.calculateRemainingMinutes(rental) + ' phút nữa sẽ hết thời gian thuê.'}">
+                                Còn 15 phút nữa sẽ hết thời gian thuê.
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Số khách:
+                                <span th:text="${rental.guestCount != null ? rental.guestCount : 0}">2</span>
+                            </div>
+                            <div class="small mt-1" th:if="${rental.note != null && !#strings.isEmpty(rental.note)}">
+                                <span class="fw-semibold">Ghi chú:</span>
+                                <span th:text="${rental.note}">Khách muốn phòng yên tĩnh.</span>
+                            </div>
+                        </td>
+                        <td>
+                            <form th:action="@{'/staff/rentals/' + ${rental.id} + '/services/add'}"
+                                  method="post"
+                                  class="compact-inline-form">
+                                <select name="serviceId" class="form-select form-select-sm" required>
+                                    <option value="">-- Chọn dịch vụ --</option>
+                                    <option th:each="service : ${activeServices}"
+                                            th:value="${service.id}"
+                                            th:text="${service.name + ' - ' + #numbers.formatDecimal(service.basePrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">
+                                        Laundry - 50.000 đ
+                                    </option>
+                                </select>
+                                <input type="number" name="quantity" class="form-control form-control-sm" min="1" value="1" required>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i>Thêm
+                                </button>
+                            </form>
+
+                            <div class="small text-muted mt-2">
+                                Dùng để ghi nhận dịch vụ phát sinh khi khách đang ở.
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small mb-2"
+                                 th:classappend="${@staffController.hasSettlementPayment(rental.id) ? ' text-success' : ' text-warning'}"
+                                 th:text="${@staffController.hasSettlementPayment(rental.id) ? 'Đã có payment tất toán, có thể hoàn tất check-out.' : 'Cần ghi nhận payment tất toán trước khi hoàn tất check-out.'}">
+                                Cần ghi nhận payment tất toán trước khi hoàn tất check-out.
+                            </div>
+
+                            <div class="small text-muted mb-2">
+                                Giờ gốc: <span th:text="${rental.lengthOfStay != null ? rental.lengthOfStay : 0}">4</span> giờ
+                                | Giờ thực tế: <span th:text="${@staffController.resolveActualStayHours(rental)}">4</span> giờ
+                            </div>
+                            <div class="small mb-2"
+                                 th:if="${@staffController.resolveActualStayHours(rental) < (rental.lengthOfStay != null ? rental.lengthOfStay : 1)}"
+                                 th:classappend="${@staffController.resolveEarlyCheckoutPenaltyPercent(rental) > 0 ? ' text-danger' : ' text-success'}"
+                                 th:text="${@staffController.resolveEarlyCheckoutPenaltyPercent(rental) > 0 ? 'Trả phòng sớm dưới 80% thời lượng, phụ thu 10% trên tiền phòng thực tế.' : 'Trả phòng sớm từ 80% thời lượng trở lên, không áp dụng phạt.'}">
+                                Trả phòng sớm dưới 80% thời lượng, phụ thu 10% trên tiền phòng thực tế.
+                            </div>
+
+                            <form th:action="@{'/staff/rentals/' + ${rental.id} + '/final-payment'}"
+                                  method="post"
+                                  class="compact-inline-form mb-2">
+                                <select name="paymentMethod" class="form-select form-select-sm" required>
+                                    <option value="">-- Thanh toán cuối bằng --</option>
+                                    <option th:each="method : ${paymentMethods}"
+                                            th:value="${method.name()}"
+                                            th:text="${method.displayName}">
+                                        Tiền mặt
+                                    </option>
+                                </select>
+                                <input type="text" name="transactionCode" class="form-control form-control-sm"
+                                       placeholder="Mã giao dịch QR/chuyển khoản (nếu có)">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Xác nhận đã nhận được thanh toán cuối và tạo payment?')">
+                                    <i class="fas fa-money-check-dollar me-1"></i>Ghi nhận payment cuối
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/staff/rentals/' + ${rental.id} + '/check-out'}"
+                                  method="post"
+                                  class="compact-inline-form">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Chỉ hoàn tất khi payment cuối đã được ghi nhận. Tiếp tục?')">
+                                    <i class="fas fa-file-invoice-dollar me-1"></i>Hoàn tất check-out
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="overdue-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Khách đã quá hạn</h2>
+                <p>Khách đã vượt thời gian thuê nhưng chưa làm thủ tục thanh toán và check-out. Hệ thống không tự check-out để tránh sai dữ liệu.</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle manager-table">
+                    <thead>
+                    <tr>
+                        <th>Khách / phòng</th>
+                        <th>Thông tin quá hạn</th>
+                        <th>Cảnh báo lịch phòng</th>
+                        <th>Xử lý</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${overdueRentals == null || overdueRentals.isEmpty()}">
+                        <td colspan="4">
+                            <div class="empty-box text-center">Hiện chưa có lượt thuê nào quá hạn.</div>
+                        </td>
+                    </tr>
+                    <tr th:each="rental : ${overdueRentals}">
+                        <td>
+                            <div class="fw-bold"
+                                 th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                Lê C
+                            </div>
+                            <div class="small text-muted">Mã thuê: <span th:text="${rental.id}">REN0000003</span></div>
+                            <div class="small text-muted">
+                                Phòng: <span th:text="${rental.room != null ? rental.room.name : 'N/A'}">102</span>
+                                - <span th:text="${rental.room != null && rental.room.roomType != null ? rental.room.roomType.name : 'N/A'}">Standard</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div>Dự kiến trả phòng:
+                                <span th:text="${@staffController.calculateExpectedCheckout(rental) != null ? #temporals.format(@staffController.calculateExpectedCheckout(rental), 'dd/MM/yyyy HH:mm') : 'N/A'}">11/03/2026 19:00</span>
+                            </div>
+                            <div class="small text-danger mt-1"
+                                 th:text="${'Đã quá hạn ' + @staffController.calculateOverdueMinutes(rental) + ' phút. Cần làm việc trực tiếp với khách để xử lý.'}">
+                                Đã quá hạn 10 phút.
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Thời lượng gốc: <span th:text="${(rental.lengthOfStay != null ? rental.lengthOfStay : 0) + ' giờ'}">5 giờ</span>
+                                | Số khách: <span th:text="${rental.guestCount != null ? rental.guestCount : 0}">1</span>
+                            </div>
+                            <div class="small mt-1" th:if="${rental.note != null && !#strings.isEmpty(rental.note)}">
+                                <span class="fw-semibold">Ghi chú:</span>
+                                <span th:text="${rental.note}">Khách muốn trả phòng nhanh.</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div th:if="${@staffController.findNextBlockingCheckin(rental.id) != null}" class="small text-danger">
+                                Phòng đã có lịch sử dụng tiếp theo lúc
+                                <span th:text="${#temporals.format(@staffController.findNextBlockingCheckin(rental.id), 'dd/MM/yyyy HH:mm')}">12/03/2026 08:00</span>.
+                                Không nên tạo lượt thuê mới chồng lịch.
+                            </div>
+                            <div th:if="${@staffController.findNextBlockingCheckin(rental.id) == null}" class="small text-success">
+                                Hiện chưa có booking kế tiếp cho phòng này. Có thể xử lý thuê tiếp bằng đơn mới sau khi chốt đơn quá hạn hiện tại.
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small mb-2"
+                                 th:classappend="${@staffController.hasSettlementPayment(rental.id) ? ' text-success' : ' text-warning'}"
+                                 th:text="${@staffController.hasSettlementPayment(rental.id) ? 'Đã có payment tất toán, có thể hoàn tất check-out.' : 'Cần ghi nhận payment tất toán trước khi hoàn tất check-out.'}">
+                                Cần ghi nhận payment tất toán trước khi hoàn tất check-out.
+                            </div>
+
+                            <div class="small text-muted mb-2">
+                                Giờ gốc: <span th:text="${rental.lengthOfStay != null ? rental.lengthOfStay : 0}">4</span> giờ
+                                | Giờ thực tế: <span th:text="${@staffController.resolveActualStayHours(rental)}">4</span> giờ
+                            </div>
+                            <div class="small mb-2"
+                                 th:if="${@staffController.resolveActualStayHours(rental) < (rental.lengthOfStay != null ? rental.lengthOfStay : 1)}"
+                                 th:classappend="${@staffController.resolveEarlyCheckoutPenaltyPercent(rental) > 0 ? ' text-danger' : ' text-success'}"
+                                 th:text="${@staffController.resolveEarlyCheckoutPenaltyPercent(rental) > 0 ? 'Trả phòng sớm dưới 80% thời lượng, phụ thu 10% trên tiền phòng thực tế.' : 'Trả phòng sớm từ 80% thời lượng trở lên, không áp dụng phạt.'}">
+                                Trả phòng sớm dưới 80% thời lượng, phụ thu 10% trên tiền phòng thực tế.
+                            </div>
+
+                            <form th:action="@{'/staff/rentals/' + ${rental.id} + '/final-payment'}"
+                                  method="post"
+                                  class="compact-inline-form mb-2">
+                                <select name="paymentMethod" class="form-select form-select-sm" required>
+                                    <option value="">-- Thanh toán cuối bằng --</option>
+                                    <option th:each="method : ${paymentMethods}"
+                                            th:value="${method.name()}"
+                                            th:text="${method.displayName}">
+                                        Tiền mặt
+                                    </option>
+                                </select>
+                                <input type="text" name="transactionCode" class="form-control form-control-sm"
+                                       placeholder="Mã giao dịch QR/chuyển khoản (nếu có)">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Xác nhận đã nhận được thanh toán cuối và tạo payment cho đơn quá hạn?')">
+                                    <i class="fas fa-money-check-dollar me-1"></i>Ghi nhận payment cuối
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/staff/rentals/' + ${rental.id} + '/check-out'}"
+                                  method="post"
+                                  class="compact-inline-form">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Hoàn tất check-out cho đơn quá hạn này?')">
+                                    <i class="fas fa-file-invoice-dollar me-1"></i>Hoàn tất check-out
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="checkout-section" class="manager-card mb-4 section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Booking đã xác nhận & khách đã check-out</h2>
+                <p>Theo dõi các booking hợp lệ và danh sách lượt thuê đã hoàn tất thanh toán cuối. Booking đã xác nhận khi hủy sẽ mất toàn bộ tiền cọc.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Booking đã xác nhận</h3>
+                            <span class="subsection-meta">Nếu booking đã xác nhận mà bị hủy, khách sẽ mất toàn bộ tiền cọc đã thanh toán.</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Khách hàng</th>
+                                    <th>Phòng</th>
+                                    <th>Ngày nhận phòng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${confirmedBookings == null || confirmedBookings.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có booking nào đã xác nhận.</td>
+                                </tr>
+                                <tr th:each="rental : ${confirmedBookings}">
+                                    <td th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                        Nguyễn B
+                                    </td>
+                                    <td th:text="${rental.room != null ? rental.room.name : 'N/A'}">201</td>
+                                    <td>
+                                        <div th:text="${rental.checkinDate != null ? #temporals.format(rental.checkinDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                            18/03/2026 14:00
+                                        </div>
+                                        <div class="small mt-1" th:if="${rental.note != null && !#strings.isEmpty(rental.note)}">
+                                            <span class="fw-semibold">Ghi chú:</span>
+                                            <span th:text="${rental.note}">Khách muốn phòng gần thang máy.</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="staff-status-badge staff-status-confirmed"
+                                              th:text="${rental.status != null ? rental.status.displayName : 'N/A'}">
+                                            Đã xác nhận
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="quick-action-group mb-2">
+                                            <form th:if="${rental.status != null && rental.status.name() == 'CONFIRMED'}"
+                                                  th:action="@{'/staff/rentals/' + ${rental.id} + '/check-in'}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Xác nhận check-in cho booking này?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-door-open me-1"></i>Check-in
+                                                </button>
+                                            </form>
+
+                                            <form th:action="@{'/staff/bookings/' + ${rental.id} + '/cancel'}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Booking đã xác nhận sẽ mất toàn bộ tiền cọc nếu hủy. Bạn có chắc?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-ban me-1"></i>Hủy booking
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <div class="small mt-2"
+                                             th:classappend="${@staffController.hasPaymentForBillType(rental.id, T(com.hotel.system.entity.enums.BillType).DEPOSIT) ? ' text-success' : ' text-warning'}"
+                                             th:text="${@staffController.hasPaymentForBillType(rental.id, T(com.hotel.system.entity.enums.BillType).DEPOSIT) ? 'Đã thanh toán cọc.' : 'Đang chờ thanh toán cọc.'}">
+                                            Đã thanh toán cọc.
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Khách đã check-out</h3>
+                            <span class="subsection-meta">Sau check-out, phòng sẽ tự về sẵn sàng sau tối đa 30 phút nếu lễ tân chưa mở lại sớm hơn</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Khách hàng</th>
+                                    <th>Phòng</th>
+                                    <th>Ngày tạo lượt thuê</th>
+                                    <th>Trạng thái phòng</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${checkedOutRentals == null || checkedOutRentals.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có khách nào đã check-out.</td>
+                                </tr>
+                                <tr th:each="rental : ${checkedOutRentals}">
+                                    <td th:text="${rental.customer != null && rental.customer.user != null ? rental.customer.user.lastName + ' ' + rental.customer.user.firstName : 'N/A'}">
+                                        Nguyễn A
+                                    </td>
+                                    <td th:text="${rental.room != null ? rental.room.name : 'N/A'}">202</td>
+                                    <td th:text="${rental.rentDate != null ? #temporals.format(rental.rentDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                        01/03/2026 09:00
+                                    </td>
+                                    <td>
+                                        <span class="staff-status-badge staff-status-checkedout"
+                                              th:text="${rental.status != null ? rental.status.displayName : 'N/A'}">
+                                            Đã check-out
+                                        </span>
+                                        <div th:if="${rental.room != null && rental.room.status != null && rental.room.status.name() == 'CLEANING'}"
+                                             class="small text-warning mt-1">
+                                            Phòng đang dọn dẹp. Có thể mở lại ngay khi dọn xong; nếu chưa thao tác thì hệ thống sẽ tự mở lại sau tối đa 30 phút kể từ lúc check-out.
+                                        </div>
+                                        <div th:if="${rental.room != null && rental.room.status != null && rental.room.status.name() != 'CLEANING'}"
+                                             class="small text-muted mt-1"
+                                             th:text="${rental.room.status.displayName}">
+                                            Sẵn sàng
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form th:if="${rental.room != null && rental.room.status != null && rental.room.status.name() == 'CLEANING'}"
+                                              th:action="@{'/staff/rooms/' + ${rental.room.id} + '/mark-available'}"
+                                              method="post"
+                                              onsubmit="return confirm('Xác nhận mở lại phòng này sang trạng thái sẵn sàng?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-broom me-1"></i>Mở lại phòng
+                                            </button>
+                                        </form>
+                                        <span th:if="${rental.room == null || rental.room.status == null || rental.room.status.name() != 'CLEANING'}"
+                                              class="text-muted small">
+                                            Không có thao tác
+                                        </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history-section" class="manager-card section-anchor-offset">
+            <div class="manager-card-title">
+                <h2>Lịch sử dịch vụ, hóa đơn và thanh toán</h2>
+                <p>Theo dõi nhanh dữ liệu phát sinh để staff đối soát cuối ca.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Dịch vụ phát sinh</h3>
+                            <span class="subsection-meta">Ghi nhận theo từng lượt thuê</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Mã thuê</th>
+                                    <th>Khách hàng</th>
+                                    <th>Dịch vụ</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá áp dụng</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${serviceUsages == null || serviceUsages.isEmpty()}">
+                                    <td colspan="6" class="text-center text-muted py-4">Chưa có dịch vụ phát sinh nào.</td>
+                                </tr>
+                                <tr th:each="usage : ${serviceUsages}">
+                                    <td th:text="${usage.time != null ? #temporals.format(usage.time, 'dd/MM/yyyy HH:mm') : 'N/A'}">18/03/2026 15:00</td>
+                                    <td th:text="${usage.rental != null ? usage.rental.id : 'N/A'}">REN0000001</td>
+                                    <td th:text="${usage.rental != null && usage.rental.customer != null && usage.rental.customer.user != null ? usage.rental.customer.user.lastName + ' ' + usage.rental.customer.user.firstName : 'N/A'}">
+                                        Nguyễn Văn A
+                                    </td>
+                                    <td th:text="${usage.service != null ? usage.service.name : 'N/A'}">Laundry</td>
+                                    <td th:text="${usage.count != null ? usage.count : 0}">2</td>
+                                    <td th:text="${usage.unitPrice != null ? #numbers.formatDecimal(usage.unitPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                                        50.000 đ
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Hóa đơn</h3>
+                            <span class="subsection-meta">Bao gồm cọc và hóa đơn cuối</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Ngày tạo</th>
+                                    <th>Mã hóa đơn</th>
+                                    <th>Mã thuê</th>
+                                    <th>Loại</th>
+                                    <th>Tổng tiền</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${bills == null || bills.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có hóa đơn nào.</td>
+                                </tr>
+                                <tr th:each="bill : ${bills}">
+                                    <td th:text="${bill.createDate != null ? #temporals.format(bill.createDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                        18/03/2026 16:00
+                                    </td>
+                                    <td th:text="${bill.id}">BIL000001</td>
+                                    <td th:text="${bill.rental != null ? bill.rental.id : 'N/A'}">REN0000001</td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${bill.type != null && bill.type.name() == 'DEPOSIT'} ? ' text-bg-primary' : ' text-bg-danger'"
+                                              th:text="${bill.type != null ? bill.type.displayName : 'N/A'}">
+                                            Tiền cọc
+                                        </span>
+                                    </td>
+                                    <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                                        1.500.000 đ
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="subsection-card">
+                        <div class="subsection-header">
+                            <h3>Thanh toán</h3>
+                            <span class="subsection-meta">Lưu dấu vết giao dịch cuối ca</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle manager-table">
+                                <thead>
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Mã thanh toán</th>
+                                    <th>Phương thức</th>
+                                    <th>Mã hóa đơn</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${payments == null || payments.isEmpty()}">
+                                    <td colspan="4" class="text-center text-muted py-4">Chưa có giao dịch thanh toán nào.</td>
+                                </tr>
+                                <tr th:each="payment : ${payments}">
+                                    <td th:text="${payment.date != null ? #temporals.format(payment.date, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                        18/03/2026 16:30
+                                    </td>
+                                    <td th:text="${payment.transaction != null ? payment.transaction : 'N/A'}">BANK-ABCD1234</td>
+                                    <td th:text="${payment.method != null ? payment.method.displayName : 'N/A'}">Chuyển khoản</td>
+                                    <td th:text="${payment.bill != null ? payment.bill.id : 'N/A'}">BIL000001</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/country-select.js}"></script>
+</body>
+</html>

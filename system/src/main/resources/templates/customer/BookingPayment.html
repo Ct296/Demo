@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body>
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-5">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-credit-card me-2"></i>Thanh toán tiền cọc booking
+            </h2>
+            <p class="text-muted mb-0">
+                Booking của bạn đã được tạo ở trạng thái chờ thanh toán. Vui lòng hoàn tất tiền cọc trong vòng 30 phút để hệ thống ghi nhận và xác nhận booking.
+            </p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow border-0">
+                <img th:src="${@customerController.getPrimaryRoomImagePath(room)}"
+                     th:attr="onerror=|this.onerror=null;this.src='@{/image/default_room.jpg}';|"
+                     class="card-img-top"
+                     alt="Room">
+                <div class="card-body bg-light">
+                    <h4 class="card-title fw-bold" th:text="${room.name}">Tên phòng</h4>
+                    <span class="badge bg-info text-dark mb-3" th:text="${room.roomType.name}">Loại</span>
+
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <span th:text="${room.location}">Vị trí</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-user-friends text-primary me-2"></i>
+                            Tối đa <span th:text="${room.roomType.maxCustomers}">2</span> người
+                        </li>
+                    </ul>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Mã booking:</span>
+                        <strong th:text="${rental.id}">REN0000001</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giờ nhận phòng:</span>
+                        <strong th:text="${checkIn != null ? #temporals.format(checkIn, 'dd/MM/yyyy HH:mm') : ''}">--</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giờ trả phòng:</span>
+                        <strong th:text="${checkOut != null ? #temporals.format(checkOut, 'dd/MM/yyyy HH:mm') : ''}">--</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Thời lượng:</span>
+                        <strong th:text="${stayHours} + ' giờ'">1 giờ</strong>
+                    </div>
+
+                    <div class="alert alert-warning mt-3 mb-0 small" th:if="${expiresAt != null}">
+                        <i class="fas fa-clock me-2"></i>
+                        Booking được giữ đến
+                        <strong th:text="${#temporals.format(expiresAt, 'dd/MM/yyyy HH:mm')}">--</strong>.
+                        Quá thời gian này, nếu chưa ghi nhận cọc thì booking sẽ tự hủy.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow border-0 p-4">
+                <h5 class="fw-bold mb-4">Thông tin thanh toán tiền cọc</h5>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Tiền phòng theo giờ:</span>
+                    <span th:text="${#numbers.formatDecimal(roomSubTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2"
+                     th:if="${shortStaySurchargeAmount > 0}">
+                    <span>Phụ thu thuê ngắn (&lt; 6 giờ):</span>
+                    <span class="fw-bold text-warning"
+                          th:text="${#numbers.formatDecimal(shortStaySurchargeAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold">Tổng tiền tạm tính:</span>
+                    <span class="fw-bold text-danger"
+                          th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span>Tiền cọc cần thanh toán trước:</span>
+                    <span class="fw-bold text-primary"
+                          th:text="${#numbers.formatDecimal(depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center g-4">
+                            <div class="col-md-5 text-center">
+                                <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center shadow-sm"
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-building-columns" style="font-size: 44px;"></i>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="fas fa-shield-halved me-2 text-success"></i>Thanh toán qua VNPay Sandbox
+                                </h5>
+
+                                <div class="small text-muted mb-3">
+                                    Khi bấm nút bên dưới, bạn sẽ được chuyển tới cổng thanh toán VNPay để hoàn tất tiền cọc cho booking này.
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Mã booking:</span>
+                                    <strong th:text="${rental.id}">REN0000001</strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Số tiền cọc:</span>
+                                    <strong class="text-primary"
+                                            th:text="${#numbers.formatDecimal(depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-3" th:if="${expiresAt != null}">
+                                    <span>Hạn thanh toán:</span>
+                                    <strong th:text="${#temporals.format(expiresAt, 'dd/MM/yyyy HH:mm')}">--</strong>
+                                </div>
+
+                                <form th:if="${vnpayEnabled != null and vnpayEnabled}" th:action="@{/customer/booking/payment/vnpay}" method="post" class="mt-3">
+                                    <input type="hidden" name="rentalId" th:value="${rental.id}">
+                                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm"
+                                            onclick="return confirm('Xác nhận chuyển sang VNPay để thanh toán tiền cọc?')">
+                                        <i class="fas fa-credit-card me-2"></i>Thanh toán với VNPay
+                                    </button>
+                                </form>
+
+                                <div th:if="${vnpayEnabled == null or !vnpayEnabled}" class="alert alert-warning small mb-0 mt-3">
+                                    Hệ thống thanh toán hiện chưa sẵn sàng. Vui lòng thử lại sau.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a th:href="@{/customer/profile}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-user me-1"></i>Xem booking trong hồ sơ
+                    </a>
+                    <a th:href="@{/customer/rooms}" class="btn btn-outline-primary">
+                        <i class="fas fa-bed me-1"></i>Tiếp tục xem phòng
+                    </a>
+                </div>
+
+                <p class="text-center small text-muted mt-3 mb-1">
+                    Booking sẽ tự hủy nếu quá thời gian giữ chỗ mà chưa thanh toán thành công.
+                </p>
+                <p class="text-center small text-danger mb-0">
+                    Booking đã được xác nhận mà khách tự hủy sẽ mất toàn bộ tiền cọc.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,422 @@
+/* --- MÀU SẮC CHỦ ĐẠO --- */
+:root {
+    --customer-bg-dark: #0f172a;
+    --customer-bg-darker: #020617;
+    --customer-primary: #4f46e5;
+    --customer-primary-soft: #6366f1;
+    --customer-cyan: #0dcaf0;
+    --customer-text-soft: rgba(255, 255, 255, 0.8);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+    background: #f8fafc;
+}
+
+img {
+    max-width: 100%;
+}
+
+.bg-custom-dark {
+    background-color: var(--customer-bg-dark);
+}
+
+.text-custom-cyan {
+    color: var(--customer-cyan);
+}
+
+.text-shadow {
+    text-shadow: 0 8px 28px rgba(15, 23, 42, 0.4);
+}
+
+.hover-primary:hover {
+    color: #fff !important;
+}
+
+.hover-top {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-top:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* --- NAVBAR KHÁCH HÀNG --- */
+.customer-navbar {
+    z-index: 1030;
+}
+
+.customer-navbar-container {
+    gap: 16px;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    color: var(--customer-text-soft);
+    margin: 0 10px;
+    transition: all 0.3s;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: var(--customer-cyan) !important;
+}
+
+.customer-nav-links {
+    align-items: center;
+}
+
+.customer-nav-weather {
+    min-width: 240px;
+}
+
+.customer-nav-actions,
+.customer-user-dropdown {
+    flex-shrink: 0;
+}
+
+.customer-auth-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.customer-user-dropdown {
+    display: flex;
+    align-items: center;
+}
+
+.customer-user-trigger {
+    min-height: 42px;
+    height: 42px;
+    padding: 4px 12px 4px 6px;
+    gap: 8px;
+    border-width: 1px;
+    min-width: 0;
+    max-width: 180px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start;
+    overflow: hidden;
+    background: transparent;
+}
+
+.customer-user-trigger::after {
+    display: none;
+}
+
+.customer-user-avatar-wrap,
+.mobile-user-avatar-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #1e293b;
+}
+
+.customer-user-avatar,
+.mobile-user-avatar {
+    display: block !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background-color: #1e293b;
+    flex: 0 0 32px;
+}
+
+.customer-user-avatar-placeholder,
+.mobile-user-avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #e2e8f0;
+    font-size: 13px;
+}
+
+.customer-user-name {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.1;
+}
+
+.customer-user-caret {
+    font-size: 11px;
+    opacity: 0.8;
+    flex: 0 0 auto;
+}
+
+.customer-user-menu {
+    min-width: 210px;
+    border-radius: 14px;
+}
+
+.mobile-user-avatar-wrap {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.mobile-user-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    flex-basis: 40px;
+}
+
+
+.customer-navbar .customer-navbar-container {
+    max-width: 1480px;
+}
+
+.customer-navbar .navbar-brand {
+    flex: 0 0 auto;
+    min-width: 160px;
+    margin-right: 12px;
+}
+
+.customer-nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 2px;
+}
+
+.customer-nav-links .nav-item {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.customer-nav-links .nav-link {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 6px 10px !important;
+    margin: 0 2px;
+    font-size: 0.98rem;
+    text-align: center;
+}
+
+.customer-nav-actions {
+    flex: 0 0 auto;
+    min-width: 0;
+    gap: 12px !important;
+}
+
+.customer-nav-weather {
+    min-width: 0;
+    width: 250px;
+    max-width: 250px;
+}
+
+.customer-auth-buttons {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.customer-auth-btn {
+    min-width: 114px;
+}
+
+.customer-user-dropdown {
+    min-width: 0;
+}
+
+.customer-user-trigger {
+    min-width: 0;
+    max-width: 190px;
+    white-space: nowrap;
+}
+
+.customer-user-name {
+    max-width: 110px;
+}
+
+/* --- HOME SEARCH --- */
+.home-search-section {
+    padding-top: 18px;
+    padding-bottom: 4px;
+}
+
+.home-search-box {
+    max-width: 1080px;
+    margin-top: 0;
+}
+
+.home-search-box .form-control,
+.home-search-box .form-select {
+    min-height: 48px;
+    box-shadow: none;
+}
+
+.home-search-submit-btn {
+    min-height: 48px;
+    border: none;
+    background: linear-gradient(135deg, var(--customer-primary), #7c3aed);
+}
+
+.home-search-submit-btn:hover {
+    background: linear-gradient(135deg, #4338ca, #6d28d9);
+}
+
+.home-search-note {
+    position: relative;
+    z-index: 1;
+}
+
+.card-img-top {
+    width: 100%;
+    display: block;
+}
+
+/* --- CHỈ ÁP DỤNG STYLE "FACEBOOK" KHI Ở MOBILE (Màn hình < 992px) --- */
+@media (max-width: 991.98px) {
+    .offcanvas-custom {
+        background-color: #18191a;
+        color: white;
+        width: 85% !important;
+        max-width: 350px;
+    }
+
+    .fb-card-link {
+        background-color: #242526;
+        border-radius: 8px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-decoration: none;
+        color: #e4e6eb;
+        transition: background 0.2s;
+        height: 100%;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .fb-card-link:hover {
+        background-color: #3a3b3c;
+    }
+
+    .fb-card-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .fb-card-title {
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .mobile-user-card {
+        background: #242526;
+        border-radius: 8px;
+    }
+
+    .offcanvas-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+}
+
+/* --- CĂN CHỈNH LAYOUT PC (Màn hình >= 992px) --- */
+@media (min-width: 992px) {
+    .auth-section {
+        min-width: 0;
+        justify-content: flex-end;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1399.98px) {
+    .customer-navbar .customer-navbar-container {
+        max-width: 1320px;
+    }
+
+    .customer-nav-weather {
+        width: 220px;
+        max-width: 220px;
+    }
+
+    .customer-nav-links .nav-link {
+        font-size: 0.94rem;
+        padding-inline: 8px !important;
+    }
+
+    .customer-auth-btn {
+        min-width: 104px;
+        padding-inline: 14px !important;
+    }
+
+    .customer-user-trigger {
+        max-width: 170px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .customer-navbar .customer-navbar-container {
+        max-width: 1140px;
+    }
+
+    .customer-nav-weather {
+        width: 188px;
+        max-width: 188px;
+    }
+
+    .customer-user-name {
+        max-width: 72px;
+    }
+
+    .customer-nav-links .nav-link {
+        font-size: 0.88rem;
+        padding-inline: 6px !important;
+        margin: 0;
+    }
+
+    .customer-auth-btn {
+        min-width: 96px;
+        padding-inline: 12px !important;
+    }
+
+    .customer-user-trigger {
+        max-width: 152px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .home-search-section {
+        padding-top: 14px;
+    }
+
+    .home-search-box {
+        padding: 20px !important;
+    }
+}

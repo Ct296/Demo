@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold">Tạo tài khoản mới</h3>
+                        <p class="text-muted">Trở thành thành viên của ITHotel ngay hôm nay</p>
+                    </div>
+
+                    <div th:if="${error}" class="alert alert-danger text-center small" th:text="${error}"></div>
+                    <div th:if="${message}" class="alert alert-success text-center small" th:text="${message}"></div>
+
+                    <form th:action="@{/register}" method="post">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Họ và tên đệm</label>
+                                <input type="text" name="lastName" class="form-control" maxlength="30" required
+                                       th:value="${lastName != null ? lastName : ''}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Tên</label>
+                                <input type="text" name="firstName" class="form-control" maxlength="30" required
+                                       th:value="${firstName != null ? firstName : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Số điện thoại</label>
+                                <input type="text" name="phoneNumber" class="form-control" pattern="\d{9,11}" required
+                                       th:value="${phoneNumber != null ? phoneNumber : ''}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Giới tính</label>
+                                <select name="sex" class="form-select" required>
+                                    <option value="MALE" th:selected="${sex != null ? sex == 'MALE' : true}">Nam</option>
+                                    <option value="FEMALE" th:selected="${sex == 'FEMALE'}">Nữ</option>
+                                    <option value="UNSPECIFIED" th:selected="${sex == 'UNSPECIFIED'}">Không tiết lộ</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Ngày sinh</label>
+                                <input type="date"
+                                       name="dateOfBirth"
+                                       class="form-control"
+                                       min="1900-01-01"
+                                       required
+                                       th:value="${dateOfBirth != null ? dateOfBirth : ''}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Quốc tịch</label>
+                                <select name="nationality"
+                                        class="form-select"
+                                        data-country-select
+                                        th:attr="data-selected-country=${nationality != null ? nationality : 'Vietnam'}"
+                                        data-placeholder="-- Chọn quốc tịch --"
+                                        required>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small text-muted">Số CCCD / CMND / Hộ chiếu</label>
+                                <input type="text" name="pid" class="form-control" maxlength="20" required
+                                       th:value="${pid != null ? pid : ''}">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small text-muted">Email (Tên đăng nhập)</label>
+                                <input type="email" name="email" class="form-control" maxlength="50" required
+                                       th:value="${email != null ? email : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Mật khẩu</label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="registerPassword" class="form-control" minlength="8" maxlength="255" required>
+                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="registerPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Nhập lại mật khẩu</label>
+                                <div class="input-group">
+                                    <input type="password" name="confirmPassword" id="registerConfirmPassword" class="form-control" minlength="8" maxlength="255" required>
+                                    <button type="button" class="btn btn-outline-secondary toggle-password" data-target="registerConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm mt-4">
+                            GỬI MÃ XÁC THỰC
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <p class="small text-muted mb-0">Đã có tài khoản? <a th:href="@{/login}" class="text-primary fw-bold text-decoration-none">Đăng nhập</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+<script th:src="@{/js/common/country-select.js}"></script>
+<script th:src="@{/js/common/toggle-password.js}"></script>
+
+</body>
+</html>

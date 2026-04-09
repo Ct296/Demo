@@ -1,0 +1,29 @@
+ks	khach san
+khs	khach san
+nv	nhan vien
+ql	quan ly
+ko	khong
+k	khong
+kh	khong
+kg	khong
+dc	duoc
+đc	duoc
+hok	khong
+ok	tot
+oki	tot
+okela	tot
+good	tot
+nice	tot
+bad	te
+wifi	wi fi
+view	canh quan
+buffet	tu chon
+checkin	check in
+checkout	check out
+tolet	toilet
+wc	toilet
+drab	drap
+vs	ve sinh
+ktra	kiem tra
+phuc vu	phuc vu
+nhiet tinh	nhiet tinh

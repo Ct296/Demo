@@ -1,0 +1,612 @@
+.hr-manager-page .hr-staff-table td:nth-child(1),
+.hr-manager-page .hr-assignment-table td:nth-child(1),
+.hr-manager-page .hr-assignment-table td:nth-child(2),
+.hr-manager-page .hr-attendance-table td:nth-child(1),
+.hr-manager-page .hr-attendance-table td:nth-child(2) {
+    max-width: 0;
+}
+
+.hr-manager-page .badge {
+    white-space: nowrap;
+}
+
+.hr-manager-page .simple-list-item strong {
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .hr-manager-page .hr-staff-table,
+    .hr-manager-page .hr-schedule-table,
+    .hr-manager-page .hr-assignment-table,
+    .hr-manager-page .hr-attendance-table {
+        table-layout: auto;
+    }
+}
+
+/* Extracted from HrManager.html */
+.hr-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hr-month-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .hr-month-toolbar-left,
+        .hr-month-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .hr-month-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            min-height: 44px;
+            padding: 0.7rem 1rem;
+            border-radius: 14px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #0d4ea6;
+            font-weight: 800;
+        }
+
+        .hr-month-form {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .hr-month-form .form-control {
+            min-width: 180px;
+        }
+
+        .hr-month-nav-btn {
+            min-width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hr-calendar-shell {
+            background: #ffffff;
+            border: 1px solid var(--manager-border);
+            border-radius: 24px;
+            box-shadow: var(--manager-shadow);
+            overflow: hidden;
+        }
+
+        .hr-calendar-head {
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--manager-border);
+            background: linear-gradient(180deg, #ffffff, #fbfdff);
+        }
+
+        .hr-calendar-head h3 {
+            margin: 0 0 0.35rem;
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .hr-calendar-head p {
+            margin: 0;
+            color: var(--manager-text-soft);
+        }
+
+        .hr-calendar-table-wrap {
+            overflow-x: auto;
+        }
+
+        .hr-calendar-table {
+            width: 100%;
+            min-width: 1080px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+        }
+
+        .hr-calendar-table thead th {
+            background: #f8fafc;
+            color: var(--manager-text-soft);
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.95rem 0.9rem;
+            border-bottom: 1px solid var(--manager-border);
+            border-right: 1px solid #eef2f7;
+            white-space: nowrap;
+        }
+
+        .hr-calendar-table thead th:last-child {
+            border-right: 0;
+        }
+
+        .hr-week-row > td {
+            vertical-align: top;
+            padding: 0;
+            border-right: 1px solid #eef2f7;
+            border-bottom: 1px solid #eef2f7;
+            background: #ffffff;
+            width: 14.2857%;
+        }
+
+        .hr-week-row > td:last-child {
+            border-right: 0;
+        }
+
+        .hr-day-link,
+        .hr-day-blocked {
+            display: block;
+            min-height: 156px;
+            padding: 0.85rem;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .hr-day-link:hover {
+            background: #f8fbff;
+        }
+
+        .hr-day-cell.is-selected .hr-day-link {
+            background: #f3f8ff;
+            box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.18);
+        }
+
+        .hr-day-cell.is-today .hr-day-link {
+            box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.22);
+        }
+
+        .hr-day-cell.is-selected.is-today .hr-day-link {
+            box-shadow:
+                inset 0 0 0 2px rgba(37, 99, 235, 0.18),
+                inset 0 0 0 4px rgba(16, 185, 129, 0.16);
+        }
+
+        .hr-day-cell.is-outside-month {
+            background: #f8fafc;
+        }
+
+        .hr-day-blocked {
+            background: linear-gradient(180deg, #f8fafc, #f3f6fb);
+            min-height: 156px;
+        }
+
+        .hr-day-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .hr-day-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: var(--manager-text);
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .hr-day-cell.is-selected .hr-day-number {
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+        }
+
+        .hr-day-meta {
+            font-size: 0.76rem;
+            color: var(--manager-text-soft);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .hr-day-schedule-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .hr-day-schedule-pill {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.55rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            line-height: 1.3;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .hr-day-schedule-pill.badge-filled {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .hr-day-schedule-pill.badge-empty {
+            background: #fff7ed;
+            border-color: #fdba74;
+        }
+
+        .hr-day-schedule-name {
+            font-weight: 800;
+            color: var(--manager-text);
+        }
+
+        .hr-day-schedule-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 0.45rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            font-weight: 800;
+            color: var(--manager-text);
+            flex-shrink: 0;
+        }
+
+        .hr-day-empty {
+            display: flex;
+            align-items: center;
+            min-height: 54px;
+            padding: 0.7rem;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: var(--manager-text-soft);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .hr-detail-row > td {
+            padding: 0;
+            border-bottom: 1px solid #eef2f7;
+            background: #ffffff;
+        }
+
+        .hr-detail-panel {
+            padding: 1.15rem;
+            background: linear-gradient(180deg, #ffffff, #fcfdff);
+            border-top: 1px solid #dbeafe;
+        }
+
+        .hr-detail-panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .hr-detail-panel-head h3 {
+            margin: 0 0 0.35rem;
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .hr-detail-panel-head p {
+            margin: 0;
+            color: var(--manager-text-soft);
+        }
+
+        .hr-selected-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: 42px;
+            padding: 0.65rem 0.9rem;
+            border-radius: 14px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #0d4ea6;
+            font-weight: 800;
+        }
+
+        .hr-detail-grid {
+            display: grid;
+            grid-template-columns: minmax(250px, 0.72fr) minmax(0, 2.2fr);
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .hr-detail-card,
+        .hr-shift-card,
+        .hr-attendance-card {
+            background: #ffffff;
+            border: 1px solid var(--manager-border);
+            border-radius: 18px;
+            padding: 1rem;
+            min-width: 0;
+        }
+
+        .hr-detail-card {
+            position: sticky;
+            top: 1rem;
+        }
+
+        .hr-detail-card h4,
+        .hr-shift-card h4,
+        .hr-attendance-card h4 {
+            margin: 0 0 0.85rem;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .hr-create-form {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .hr-create-form .btn {
+            width: 100%;
+        }
+
+        .hr-shift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .hr-shift-card.is-empty {
+            background: #fffdfa;
+            border-color: #fed7aa;
+        }
+
+        .hr-shift-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+
+        .hr-shift-meta {
+            margin: 0.2rem 0 0;
+            color: var(--manager-text-soft);
+            font-size: 0.86rem;
+        }
+
+        .hr-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.42rem 0.68rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: var(--manager-text);
+            white-space: nowrap;
+        }
+
+        .hr-assignment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .hr-assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 0.7rem 0.8rem;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .hr-assignment-name {
+            font-weight: 800;
+            color: var(--manager-text);
+        }
+
+        .hr-assignment-meta {
+            margin-top: 0.18rem;
+            color: var(--manager-text-soft);
+            font-size: 0.82rem;
+        }
+
+        .hr-shift-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hr-delete-schedule-form,
+        .hr-remove-assignment-form {
+            margin: 0;
+        }
+
+        .hr-assignment-item {
+            align-items: flex-start;
+        }
+
+        .hr-assignment-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hr-assignment-note {
+            margin-top: 0.3rem;
+            color: var(--manager-text-soft);
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+
+        .hr-assignment-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hr-shift-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .hr-empty-box {
+            padding: 0.8rem 0.9rem;
+            border-radius: 14px;
+            border: 1px dashed #cbd5e1;
+            background: #ffffff;
+            color: var(--manager-text-soft);
+            font-size: 0.88rem;
+        }
+
+        .hr-inline-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+            gap: 0.65rem;
+            align-items: end;
+        }
+
+        .hr-inline-form .form-control,
+        .hr-inline-form .form-select {
+            min-height: 42px;
+            border-radius: 12px;
+        }
+
+        .hr-attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .hr-attendance-card {
+            transition: opacity 0.18s ease, transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .hr-attendance-card.is-dim {
+            opacity: 0.56;
+        }
+
+        .hr-attendance-card.is-active {
+            border-color: rgba(16, 185, 129, 0.38);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.10);
+            background: linear-gradient(180deg, #ffffff, #f3fff8);
+        }
+
+        .hr-attendance-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .hr-attendance-meta {
+            margin: 0.22rem 0 0;
+            color: var(--manager-text-soft);
+            font-size: 0.84rem;
+        }
+
+        .hr-attendance-stats {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .hr-attendance-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.42rem 0.68rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 0.76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .hr-attendance-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+        }
+
+        .hr-attendance-table {
+            min-width: 640px;
+            margin: 0;
+        }
+
+        .hr-attendance-table th,
+        .hr-attendance-table td {
+            padding-top: 0.8rem;
+            padding-bottom: 0.8rem;
+            vertical-align: middle;
+        }
+
+        .hr-attendance-actions {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (max-width: 1399.98px) {
+            .hr-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hr-shift-grid,
+            .hr-attendance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1199.98px) {
+            .hr-overview-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hr-inline-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .hr-overview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hr-calendar-table {
+                min-width: 860px;
+            }
+
+            .hr-detail-panel {
+                padding: 0.9rem;
+            }
+        }

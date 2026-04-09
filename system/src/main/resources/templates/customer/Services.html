@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body>
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <span class="badge bg-primary px-3 py-2 mb-3">Dịch vụ khách sạn</span>
+        <h1 class="fw-bold mb-3">Danh sách dịch vụ từ hệ thống</h1>
+        <p class="lead text-muted mb-0">
+            Các dịch vụ dưới đây được lấy trực tiếp từ database và có thể thay đổi theo dữ liệu vận hành của khách sạn.
+        </p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div th:if="${services == null || services.isEmpty()}" class="alert alert-light border">
+            Hiện chưa có dịch vụ nào trong hệ thống.
+        </div>
+
+        <div class="row g-4" th:if="${services != null && !services.isEmpty()}">
+            <div class="col-md-6 col-lg-4" th:each="service : ${services}">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <img th:src="${@mediaViewSupport.resolveServiceImagePath(service.imagePath)}"
+                         th:attr="onerror=|this.onerror=null;this.src='@{/image/default_service.jpg}';|"
+                         class="card-img-top rounded-top-4"
+                         alt="Service"
+                         style="height: 220px; object-fit: cover;">
+                    <div class="card-body p-4 d-flex flex-column">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h4 class="fw-bold mb-0" th:text="${service.name}">Nước suối</h4>
+                            <span class="badge text-bg-dark"
+                                  th:text="${service.unit != null ? service.unit : 'ĐVT'}">
+                                chai
+                            </span>
+                        </div>
+
+                        <div class="mb-3 text-primary fw-semibold"
+                             th:text="${service.basePrice != null ? #numbers.formatDecimal(service.basePrice, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                            10.000 đ
+                        </div>
+
+                        <p class="text-muted flex-grow-1"
+                           th:text="${service.description != null && service.description != '' ? service.description : 'Chưa có mô tả cho dịch vụ này.'}">
+                            Mô tả dịch vụ
+                        </p>
+
+                        <div class="mt-3 small text-muted">
+                            <i class="fas fa-clock me-2"></i>
+                            <span th:text="${service.createDate != null ? 'Thêm vào hệ thống: ' + #temporals.format(service.createDate, 'dd/MM/yyyy HH:mm') : 'Không có thời gian tạo'}">
+                                Thêm vào hệ thống
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 g-4 align-items-stretch">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 p-lg-5">
+                        <h3 class="fw-bold mb-3">Cách sử dụng dịch vụ</h3>
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary fs-4"><i class="fas fa-1"></i></div>
+                            <div>
+                                <div class="fw-semibold">Đăng ký tại lễ tân</div>
+                                <div class="text-muted">Khách đang lưu trú có thể yêu cầu lễ tân ghi nhận dịch vụ phát sinh.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary fs-4"><i class="fas fa-2"></i></div>
+                            <div>
+                                <div class="fw-semibold">Ghi nhận vào lượt thuê</div>
+                                <div class="text-muted">Nhân viên sẽ cập nhật dịch vụ vào rental tương ứng của khách hàng.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="me-3 text-primary fs-4"><i class="fas fa-3"></i></div>
+                            <div>
+                                <div class="fw-semibold">Thanh toán khi check-out</div>
+                                <div class="text-muted">Chi phí dịch vụ sẽ được cộng vào hóa đơn cuối của lượt thuê.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <h3 class="fw-bold mb-3">Lưu ý</h3>
+                        <p class="mb-3">
+                            Giá dịch vụ được lấy từ dữ liệu hệ thống và có thể thay đổi khi khách sạn cập nhật danh mục.
+                        </p>
+                        <p class="mb-4">
+                            Để sử dụng dịch vụ phát sinh, bạn cần có lượt thuê đang hoạt động hoặc đang lưu trú tại khách sạn.
+                        </p>
+                        <div class="mt-auto d-grid gap-2">
+                            <a th:href="@{/customer/rooms}" class="btn btn-light text-primary fw-bold">
+                                <i class="fas fa-calendar-check me-2"></i>Đặt phòng ngay
+                            </a>
+                            <a th:href="@{/customer/feedback}" class="btn btn-outline-light">
+                                <i class="fas fa-star me-2"></i>Gửi đánh giá
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a th:href="@{/customer/home}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+<div th:replace="~{common/chatbot :: default}"></div>
+<script th:src="@{/js/common/chatbot.js}"></script>
+</body>
+</html>

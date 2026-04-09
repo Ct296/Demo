@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body>
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-5">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-clipboard-check"></i> Xác nhận đặt phòng
+            </h2>
+            <p class="text-muted mb-0">
+                Booking được tính theo số giờ nguyên giữa thời điểm nhận và trả phòng. Hệ thống hiện chỉ hỗ trợ chọn theo giờ tròn và tối thiểu 1 giờ.
+            </p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow border-0">
+                <div class="position-relative"
+                     th:with="gallery=${@customerController.getRoomGalleryPaths(room)}">
+                    <div class="room-gallery js-room-gallery"
+                         th:attr="data-gallery-size=${gallery.size()}">
+                        <img th:each="imagePath, stat : ${gallery}"
+                             th:src="${imagePath}"
+                             th:attr="onerror=|this.onerror=null;this.src='@{/image/default_room.jpg}';|"
+                             th:class="'card-img-top room-gallery-image' + (${stat.index == 0} ? ' is-active' : '')"
+                             alt="Room"
+                             style="height: 260px; object-fit: cover; display: none;">
+
+                        <button type="button"
+                                class="room-gallery-btn room-gallery-btn-prev"
+                                th:if="${gallery.size() > 1}"
+                                aria-label="Ảnh trước">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+
+                        <button type="button"
+                                class="room-gallery-btn room-gallery-btn-next"
+                                th:if="${gallery.size() > 1}"
+                                aria-label="Ảnh sau">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body bg-light">
+                    <h4 class="card-title fw-bold" th:text="${room.name}">Tên phòng</h4>
+                    <span class="badge bg-info text-dark mb-3" th:text="${room.roomType.name}">Loại</span>
+
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <span th:text="${room.location}">Vị trí</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-user-friends text-primary me-2"></i>
+                            Tối đa <span th:text="${room.roomType.maxCustomers}">2</span> người
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-ruler-combined text-secondary me-2"></i>
+                            <span th:text="${room.roomType.area} + ' m²'">30 m²</span>
+                        </li>
+                    </ul>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Giá mỗi giờ áp dụng:</span>
+                        <strong th:text="${#numbers.formatDecimal(roomUnitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Tỷ lệ cọc:</span>
+                        <strong th:text="${depositPercent} + '%'">0%</strong>
+                    </div>
+
+                    <div class="alert alert-warning mt-3 mb-0 small">
+                        <i class="fas fa-clock me-2"></i>
+                        Sau khi tạo booking, hệ thống sẽ giữ chỗ trong <strong>30 phút</strong> để chờ ghi nhận tiền cọc.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow border-0 p-4">
+                <h5 class="fw-bold mb-4">Thông tin chuyến đi</h5>
+
+                <div th:if="${bookingConflictMessage != null}" class="alert alert-danger">
+                    <i class="fas fa-triangle-exclamation me-2"></i>
+                    <span th:text="${bookingConflictMessage}"></span>
+                </div>
+
+                <form th:action="@{/customer/booking/confirm}" method="post" id="bookingForm">
+                    <input type="hidden" name="roomId" th:value="${room.id}">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Giờ nhận phòng</label>
+                            <input type="datetime-local"
+                                   id="bookingCheckIn"
+                                   name="checkIn"
+                                   class="form-control"
+                                   step="3600"
+                                   th:value="${checkIn != null ? #temporals.format(checkIn, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                                   required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Giờ trả phòng</label>
+                            <input type="datetime-local"
+                                   id="bookingCheckOut"
+                                   name="checkOut"
+                                   class="form-control"
+                                   step="3600"
+                                   th:value="${checkOut != null ? #temporals.format(checkOut, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">Số khách</label>
+                            <input type="number"
+                                   name="guestCount"
+                                   class="form-control"
+                                   min="1"
+                                   th:max="${room.roomType.maxCustomers}"
+                                   th:value="${guestCount != null ? guestCount : 1}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-clock fs-4 me-3"></i>
+                        <div>
+                            Tổng thời gian lưu trú hiện tại: <strong th:text="${stayHours}">1</strong> giờ
+                            <span th:if="${shortStaySurchargeAmount > 0}" class="d-block small mt-1">
+                                Thuê dưới 6 giờ được cộng thêm 10% theo quy định.
+                            </span>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mt-4 mb-3">Thông tin người đặt</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:value="${user.lastName + ' ' + user.firstName}"
+                                   readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:value="${user.phoneNumber}"
+                                   readonly>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Ghi chú thêm</label>
+                            <textarea name="note"
+                                      class="form-control"
+                                      rows="2"
+                                      maxlength="255"
+                                      placeholder="Ví dụ: Tôi muốn phòng tầng cao, check-in trễ..."
+                                      th:text="${note}"></textarea>
+                            <div class="form-text">
+                                Ghi chú sẽ được lưu cùng booking để lễ tân có thể xem khi xử lý đơn. Có thể để trống nếu không có yêu cầu thêm.
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Tiền phòng theo giờ:</span>
+                        <span th:text="${#numbers.formatDecimal(roomSubTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2"
+                         th:if="${shortStaySurchargeAmount > 0}">
+                        <span>Phụ thu thuê ngắn (&lt; 6 giờ):</span>
+                        <span class="fw-bold text-warning"
+                              th:text="${#numbers.formatDecimal(shortStaySurchargeAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold">Tổng tiền tạm tính:</span>
+                        <span class="fw-bold text-danger"
+                              th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Tiền cọc cần thanh toán trước:</span>
+                        <span class="fw-bold text-primary"
+                              th:text="${#numbers.formatDecimal(depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span>Phần còn lại thanh toán tại khách sạn:</span>
+                        <span class="fw-bold"
+                              th:text="${#numbers.formatDecimal(remainingAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+
+                    <div class="alert alert-light border mb-4">
+                        <div class="fw-bold mb-2">
+                            <i class="fas fa-info-circle text-primary me-2"></i>Quy trình sau khi xác nhận
+                        </div>
+                        <ol class="mb-0 ps-3">
+                            <li>Bạn có thể chỉnh lại thời gian và bấm <strong>KIỂM TRA LẠI LỊCH PHÒNG</strong>.</li>
+                            <li>Sau khi hợp lệ, bấm <strong>XÁC NHẬN ĐẶT PHÒNG</strong> để tạo booking tạm.</li>
+                            <li>Hệ thống chuyển sang trang thanh toán cọc qua VNPay Sandbox.</li>
+                            <li>Booking được xác nhận tự động sau khi hệ thống ghi nhận thanh toán cọc thành công.</li>
+                        </ol>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row gap-3">
+                        <button type="submit"
+                                class="btn btn-outline-primary flex-fill py-3 fw-bold"
+                                th:formaction="@{/customer/booking}"
+                                formmethod="get">
+                            <i class="fas fa-rotate-right me-2"></i> KIỂM TRA LẠI LỊCH PHÒNG
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-success flex-fill py-3 fw-bold fs-6 shadow"
+                                th:disabled="${bookingAvailable != null && !bookingAvailable}"
+                                onclick="return confirm('Xác nhận tạo booking này? Hệ thống sẽ kiểm tra trùng lịch lần cuối trước khi tạo booking.')">
+                            <i class="fas fa-check-circle me-2"></i> XÁC NHẬN ĐẶT PHÒNG
+                        </button>
+                    </div>
+
+                    <p class="text-center small text-muted mt-2 mb-1">
+                        Khi bấm xác nhận, hệ thống vẫn kiểm tra trùng lịch lần cuối trước khi tạo booking.
+                    </p>
+
+                    <p class="text-center small text-danger mb-0">
+                        Booking đã được xác nhận mà khách tự hủy sẽ mất toàn bộ tiền cọc.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+
+<style>
+    .room-gallery {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .room-gallery-image {
+        width: 100%;
+        display: none;
+    }
+
+    .room-gallery-image.is-active {
+        display: block !important;
+    }
+
+    .room-gallery-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.55);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+        transition: 0.2s ease;
+    }
+
+    .room-gallery-btn:hover {
+        background: rgba(15, 23, 42, 0.82);
+    }
+
+    .room-gallery-btn-prev {
+        left: 10px;
+    }
+
+    .room-gallery-btn-next {
+        right: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const galleries = document.querySelectorAll('.js-room-gallery');
+
+        galleries.forEach(function (gallery) {
+            const images = Array.from(gallery.querySelectorAll('.room-gallery-image'));
+            const prevBtn = gallery.querySelector('.room-gallery-btn-prev');
+            const nextBtn = gallery.querySelector('.room-gallery-btn-next');
+
+            if (!images.length) {
+                return;
+            }
+
+            let currentIndex = 0;
+
+            function showImage(index) {
+                images.forEach(function (img, imgIndex) {
+                    img.classList.toggle('is-active', imgIndex === index);
+                });
+            }
+
+            showImage(currentIndex);
+
+            if (images.length <= 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                return;
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                    showImage(currentIndex);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    currentIndex = (currentIndex + 1) % images.length;
+                    showImage(currentIndex);
+                });
+            }
+        });
+
+        const checkInInput = document.getElementById('bookingCheckIn');
+        const checkOutInput = document.getElementById('bookingCheckOut');
+
+        if (checkInInput && checkOutInput) {
+            function getRoundedNow() {
+                const now = new Date();
+                now.setMinutes(0, 0, 0);
+                now.setHours(now.getHours() + 1);
+                return now;
+            }
+
+            function addHours(date, hours) {
+                const clone = new Date(date.getTime());
+                clone.setHours(clone.getHours() + hours);
+                return clone;
+            }
+
+            function formatForDateTimeLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+
+            function toDate(value) {
+                return value ? new Date(value) : null;
+            }
+
+            function syncConstraints() {
+                const minCheckIn = getRoundedNow();
+                const minCheckInValue = formatForDateTimeLocal(minCheckIn);
+                checkInInput.min = minCheckInValue;
+
+                if (!checkInInput.value || toDate(checkInInput.value) < minCheckIn) {
+                    checkInInput.value = minCheckInValue;
+                }
+
+                const selectedCheckIn = toDate(checkInInput.value) || minCheckIn;
+                const minCheckOut = addHours(selectedCheckIn, 1);
+                const minCheckOutValue = formatForDateTimeLocal(minCheckOut);
+                checkOutInput.min = minCheckOutValue;
+
+                if (!checkOutInput.value || toDate(checkOutInput.value) <= selectedCheckIn) {
+                    checkOutInput.value = minCheckOutValue;
+                }
+            }
+
+            checkInInput.addEventListener('change', syncConstraints);
+            syncConstraints();
+        }
+    });
+</script>
+
+</body>
+</html>

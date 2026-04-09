@@ -1,0 +1,28 @@
+{
+  "train_size": 2400,
+  "test_size": 600,
+  "columns": [
+    "entry_id",
+    "text",
+    "overall_sentiment",
+    "primary_aspect",
+    "positive_aspects",
+    "negative_aspects",
+    "neutral_aspects",
+    "multilabel_targets",
+    "label_count",
+    "weighted_score",
+    "text_original"
+  ],
+  "sentiment_models_tested": [
+    "nb",
+    "logreg",
+    "svm"
+  ],
+  "aspect_models_tested": [
+    "nb",
+    "logreg",
+    "svm"
+  ],
+  "visualization_dir": "D:\\CTU\\25_26_HK2\\NL_CNTT\\project_v3\\Hotel_Comment_AI\\artifacts\\models\\visualizations"
+}

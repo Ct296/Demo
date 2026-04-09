@@ -1,0 +1,36 @@
+.room-price-manager-page .room-type-table td:last-child,
+.room-price-manager-page .room-type-table th:last-child,
+.room-price-manager-page .room-table td:last-child,
+.room-price-manager-page .room-table th:last-child,
+.room-price-manager-page .price-rate-table td:last-child,
+.room-price-manager-page .price-rate-table th:last-child,
+.room-price-manager-page .applied-period-table td:last-child,
+.room-price-manager-page .applied-period-table th:last-child {
+    text-align: center;
+}
+
+.room-price-manager-page .room-type-table .btn-sm,
+.room-price-manager-page .room-table .btn-sm,
+.room-price-manager-page .price-rate-table .btn-sm,
+.room-price-manager-page .applied-period-table .btn-sm {
+    min-width: 72px;
+}
+
+.room-price-manager-page .price-rate-table td:nth-child(3),
+.room-price-manager-page .room-type-table td:nth-child(4),
+.room-price-manager-page .applied-period-table td:nth-child(2) {
+    max-width: 0;
+}
+
+.room-price-manager-page .badge {
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .room-price-manager-page .room-type-table,
+    .room-price-manager-page .room-table,
+    .room-price-manager-page .price-rate-table,
+    .room-price-manager-page .applied-period-table {
+        table-layout: auto;
+    }
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body>
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-lg-5 col-xl-4">
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <span class="badge rounded-pill text-bg-primary-subtle text-primary fw-semibold mb-3">Đánh giá dịch vụ</span>
+                    <h2 class="fw-bold mb-2" th:text="${myReview != null ? 'Đánh giá của bạn' : 'Gửi phản hồi'}">Gửi phản hồi</h2>
+                    <p class="text-muted mb-4" th:text="${myReview != null ? 'Bạn đã có một đánh giá. Bạn có thể cập nhật nội dung hoặc xóa nếu không muốn hiển thị nữa.' : 'Chia sẻ trải nghiệm của bạn để khách sạn cải thiện dịch vụ tốt hơn.'}">
+                        Chia sẻ trải nghiệm của bạn để khách sạn cải thiện dịch vụ tốt hơn.
+                    </p>
+
+                    <div th:if="${!canManageReview}" class="rounded-4 border bg-light p-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="text-primary fs-4">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">Đăng nhập để quản lý đánh giá</h5>
+                                <p class="text-muted mb-3">
+                                    Bạn vẫn có thể xem toàn bộ góp ý công khai mà không cần đăng nhập. Tuy nhiên,
+                                    để gửi, sửa hoặc xóa đánh giá của mình, bạn cần đăng nhập bằng tài khoản khách hàng.
+                                </p>
+                                <a th:href="@{/login}" class="btn btn-primary px-4">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${canManageReview and myReview == null}">
+                        <form th:action="@{/customer/feedback}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mức độ hài lòng</label>
+                                <select name="rate" class="form-select" required>
+                                    <option value="">-- Chọn số sao --</option>
+                                    <option value="5">5 sao - Rất hài lòng</option>
+                                    <option value="4">4 sao - Hài lòng</option>
+                                    <option value="3">3 sao - Bình thường</option>
+                                    <option value="2">2 sao - Chưa hài lòng</option>
+                                    <option value="1">1 sao - Rất không hài lòng</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Nội dung phản hồi</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="5"
+                                          maxlength="255"
+                                          placeholder="Ví dụ: Phòng sạch sẽ, nhân viên nhiệt tình, đồ ăn ngon..."></textarea>
+                                <div class="form-text">Tối đa 255 ký tự.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi phản hồi
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:if="${canManageReview and myReview != null}">
+                        <div class="border rounded-4 p-4 bg-light-subtle mb-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1">Đánh giá hiện tại của bạn</h5>
+                                    <div class="text-warning">
+                                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, myReview.rate)}"></i>
+                                        <span class="text-dark ms-2 fw-semibold" th:text="${myReview.rate} + ' / 5'"></span>
+                                    </div>
+                                </div>
+                                <small class="text-muted"
+                                       th:text="${myReview.updateDate != null ? #temporals.format(myReview.updateDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">01/01/2026 10:00</small>
+                            </div>
+                            <p class="mb-0 text-muted"
+                               th:text="${myReview.description != null && !myReview.description.isBlank() ? myReview.description : 'Bạn chưa nhập mô tả chi tiết.'}">
+                                Nội dung đánh giá hiện tại
+                            </p>
+                        </div>
+
+                        <form th:action="@{/customer/feedback/update}" method="post" class="mb-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Cập nhật mức độ hài lòng</label>
+                                <select name="rate" class="form-select" required>
+                                    <option value="">-- Chọn số sao --</option>
+                                    <option value="5" th:selected="${myReview.rate == 5}">5 sao - Rất hài lòng</option>
+                                    <option value="4" th:selected="${myReview.rate == 4}">4 sao - Hài lòng</option>
+                                    <option value="3" th:selected="${myReview.rate == 3}">3 sao - Bình thường</option>
+                                    <option value="2" th:selected="${myReview.rate == 2}">2 sao - Chưa hài lòng</option>
+                                    <option value="1" th:selected="${myReview.rate == 1}">1 sao - Rất không hài lòng</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Cập nhật nội dung phản hồi</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="5"
+                                          maxlength="255"
+                                          placeholder="Ví dụ: Phòng sạch sẽ, nhân viên nhiệt tình, đồ ăn ngon..."
+                                          th:text="${myReview.description}"></textarea>
+                                <div class="form-text">Tối đa 255 ký tự.</div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
+                                    <i class="fas fa-pen me-2"></i>Lưu cập nhật
+                                </button>
+                            </div>
+                        </form>
+
+                        <form th:action="@{/customer/feedback/delete}" method="post"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá hiện tại không?');">
+                            <button type="submit" class="btn btn-outline-danger px-4 py-2 fw-bold">
+                                <i class="fas fa-trash-alt me-2"></i>Xóa đánh giá
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                        <div>
+                            <h3 class="fw-bold mb-1">Góp ý từ khách hàng</h3>
+                            <p class="text-muted mb-0">Danh sách đánh giá công khai từ những khách đã sử dụng dịch vụ.</p>
+                        </div>
+                        <span class="badge rounded-pill text-bg-light border text-dark px-3 py-2"
+                              th:text="${reviews != null ? reviews.size() : 0} + ' đánh giá'">0 đánh giá</span>
+                    </div>
+
+                    <div th:if="${reviews != null && !reviews.isEmpty()}" class="d-flex flex-column gap-3">
+                        <div class="border rounded-4 p-4" th:each="review : ${reviews}">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1"
+                                        th:text="${review.customer != null && review.customer.user != null ? (review.customer.user.lastName + ' ' + review.customer.user.firstName) : 'Khách hàng'}">
+                                        Nguyễn Văn A
+                                    </h5>
+                                    <div class="text-warning">
+                                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, review.rate)}"></i>
+                                        <span class="text-dark ms-2 fw-semibold" th:text="${review.rate} + ' / 5'"></span>
+                                    </div>
+                                </div>
+                                <small class="text-muted"
+                                       th:text="${review.updateDate != null ? #temporals.format(review.updateDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                    09/03/2026 10:00
+                                </small>
+                            </div>
+                            <p class="mb-0 text-muted"
+                               th:text="${review.description != null && !review.description.isBlank() ? review.description : 'Khách hàng không để lại mô tả chi tiết.'}">
+                                Nội dung đánh giá
+                            </p>
+                        </div>
+                    </div>
+
+                    <div th:if="${reviews == null || reviews.isEmpty()}" class="text-center text-muted py-5">
+                        <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                        <p class="mb-0">Hiện chưa có góp ý công khai nào.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+<div th:replace="~{common/chatbot :: default}"></div>
+<script th:src="@{/js/common/chatbot.js}"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+dich_vu
+phong
+tien_nghi_phong
+ve_sinh
+gia_ca
+an_uong
+tien_ich
+vi_tri
+tong_quan_khach_san
+khac

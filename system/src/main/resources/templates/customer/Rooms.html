@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/CustomerLayout :: head-content}"></head>
+<body>
+
+<nav th:replace="~{common/CustomerLayout :: header}"></nav>
+
+<div class="container my-4 my-md-5">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card p-3 p-md-4 mb-3 shadow-sm border-0">
+        <form th:action="@{/customer/rooms}" method="get" class="row g-3" id="roomSearchForm">
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-bold small text-muted">GIỜ NHẬN PHÒNG</label>
+                <input type="datetime-local"
+                       id="checkInInput"
+                       name="checkIn"
+                       class="form-control"
+                       step="3600"
+                       required
+                       th:value="${checkIn != null ? #temporals.format(checkIn, 'yyyy-MM-dd''T''HH:mm') : ''}">
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-bold small text-muted">GIỜ TRẢ PHÒNG</label>
+                <input type="datetime-local"
+                       id="checkOutInput"
+                       name="checkOut"
+                       class="form-control"
+                       step="3600"
+                       required
+                       th:value="${checkOut != null ? #temporals.format(checkOut, 'yyyy-MM-dd''T''HH:mm') : ''}">
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-bold small text-muted">LOẠI PHÒNG</label>
+                <select class="form-select" name="typeId">
+                    <option value="">Tất cả</option>
+                    <option th:each="type : ${roomTypes}"
+                            th:value="${type.id}"
+                            th:text="${type.name}"
+                            th:selected="${type.id == selectedTypeId}"></option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                    <i class="fas fa-search me-2"></i> TÌM PHÒNG
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="alert alert-light border small mb-4">
+        Chỉ được chọn theo <strong>giờ tròn</strong> kể từ thời điểm hiện tại. Giờ trả phòng phải sau giờ nhận phòng ít nhất <strong>1 giờ</strong>.
+        Danh sách bên dưới là các phòng <strong>có thể đặt</strong> trong khoảng thời gian bạn chọn, đã kiểm tra theo <strong>khung giờ</strong>, <strong>lịch thuê hiện có</strong> và <strong>thời gian dọn phòng</strong>.
+    </div>
+
+    <h4 class="mb-4 fw-bold text-dark border-start border-4 border-warning ps-3">
+        KẾT QUẢ TÌM KIẾM
+    </h4>
+
+    <div class="row g-4">
+        <div class="col-12 col-sm-6 col-lg-4" th:each="item : ${roomCards}">
+            <div class="card h-100 shadow-sm border-0 room-card">
+                <div class="position-relative"
+                     th:with="gallery=${@customerController.getRoomGalleryPaths(item.room)}">
+                    <div class="room-gallery js-room-gallery"
+                         th:attr="data-gallery-size=${gallery.size()}">
+                        <img th:each="imagePath, stat : ${gallery}"
+                             th:src="${imagePath}"
+                             th:attr="onerror=|this.onerror=null;this.src='@{/image/default_room.jpg}';|"
+                             th:class="'card-img-top room-gallery-image' + (${stat.index == 0} ? ' is-active' : '')"
+                             alt="Room"
+                             style="height: 200px; object-fit: cover; display: none;">
+
+                        <button type="button"
+                                class="room-gallery-btn room-gallery-btn-prev"
+                                th:if="${gallery.size() > 1}"
+                                aria-label="Ảnh trước">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+
+                        <button type="button"
+                                class="room-gallery-btn room-gallery-btn-next"
+                                th:if="${gallery.size() > 1}"
+                                aria-label="Ảnh sau">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <span class="position-absolute top-0 end-0 bg-success text-white px-2 py-1 m-2 rounded small fw-bold"
+                          th:text="${item.room.status.displayName}">Available</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="card-title fw-bold mb-1" th:text="${item.room.name}">P.101</h5>
+                            <small class="text-muted" th:text="${item.room.roomType.name}">Deluxe</small>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="text-primary fw-bold mb-0"
+                                th:text="${#numbers.formatDecimal(item.displayPrice, 0, 'COMMA', 0, 'POINT')}">
+                                500.000
+                            </h5>
+                            <small class="text-muted">VNĐ/giờ</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center text-muted small mb-3">
+                        <span class="me-3"><i class="fas fa-user-friends me-1"></i> <span th:text="${item.room.roomType.maxCustomers}">2</span> người</span>
+                        <span><i class="fas fa-ruler-combined me-1"></i> <span th:text="${item.room.roomType.area}"></span>m²</span>
+                    </div>
+
+                    <div class="small text-muted mb-3">
+                        Khách có thể chọn giờ nhận và giờ trả. Hệ thống sẽ quy đổi tổng thời lượng theo số giờ ở thực tế.
+                    </div>
+
+                    <a th:href="@{/customer/booking(roomId=${item.room.id}, checkIn=${checkIn}, checkOut=${checkOut})}"
+                       class="btn btn-warning w-100 fw-bold text-dark shadow-sm">
+                        ĐẶT NGAY <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12" th:if="${rooms == null || rooms.isEmpty()}">
+            <div class="alert alert-secondary text-center py-5">
+                <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                <p class="mb-0">Không tìm thấy phòng phù hợp trong khoảng thời gian này.</p>
+                <small>Vui lòng thử lại với khung giờ khác hoặc loại phòng khác.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/CustomerLayout :: footer}"></footer>
+<div th:replace="~{common/chatbot :: default}"></div>
+<script th:src="@{/js/common/chatbot.js}"></script>
+<style>
+    .room-gallery {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .room-gallery-image {
+        width: 100%;
+        display: none;
+    }
+
+    .room-gallery-image.is-active {
+        display: block !important;
+    }
+
+    .room-gallery-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.55);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+        transition: 0.2s ease;
+    }
+
+    .room-gallery-btn:hover {
+        background: rgba(15, 23, 42, 0.82);
+    }
+
+    .room-gallery-btn-prev {
+        left: 10px;
+    }
+
+    .room-gallery-btn-next {
+        right: 10px;
+    }
+</style>
+
+<script>
+    (function () {
+        const checkInInput = document.getElementById('checkInInput');
+        const checkOutInput = document.getElementById('checkOutInput');
+        const roomSearchForm = document.getElementById('roomSearchForm');
+
+        if (checkInInput && checkOutInput && roomSearchForm) {
+            function getRoundedNow() {
+                const now = new Date();
+                now.setMinutes(0, 0, 0);
+                now.setHours(now.getHours() + 1);
+                return now;
+            }
+
+            function addHours(date, hours) {
+                const clone = new Date(date.getTime());
+                clone.setHours(clone.getHours() + hours);
+                return clone;
+            }
+
+            function formatForDateTimeLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+
+            function toDate(value) {
+                return value ? new Date(value) : null;
+            }
+
+            function syncConstraints() {
+                const minCheckIn = getRoundedNow();
+                const minCheckInValue = formatForDateTimeLocal(minCheckIn);
+                checkInInput.min = minCheckInValue;
+
+                if (!checkInInput.value || toDate(checkInInput.value) < minCheckIn) {
+                    checkInInput.value = minCheckInValue;
+                }
+
+                const selectedCheckIn = toDate(checkInInput.value) || minCheckIn;
+                const minCheckOut = addHours(selectedCheckIn, 1);
+                const minCheckOutValue = formatForDateTimeLocal(minCheckOut);
+                checkOutInput.min = minCheckOutValue;
+
+                if (!checkOutInput.value || toDate(checkOutInput.value) <= selectedCheckIn) {
+                    checkOutInput.value = minCheckOutValue;
+                }
+            }
+
+            checkInInput.addEventListener('change', syncConstraints);
+            roomSearchForm.addEventListener('submit', function (event) {
+                syncConstraints();
+                const checkInDate = toDate(checkInInput.value);
+                const checkOutDate = toDate(checkOutInput.value);
+
+                if (!checkInDate || !checkOutDate || checkOutDate <= checkInDate) {
+                    event.preventDefault();
+                    alert('Giờ trả phòng phải sau giờ nhận phòng ít nhất 1 giờ.');
+                }
+            });
+
+            syncConstraints();
+        }
+
+        const galleries = document.querySelectorAll('.js-room-gallery');
+
+        galleries.forEach(function (gallery) {
+            const images = Array.from(gallery.querySelectorAll('.room-gallery-image'));
+            const prevBtn = gallery.querySelector('.room-gallery-btn-prev');
+            const nextBtn = gallery.querySelector('.room-gallery-btn-next');
+
+            if (!images.length) {
+                return;
+            }
+
+            let currentIndex = 0;
+
+            function showImage(index) {
+                images.forEach(function (img, imgIndex) {
+                    img.classList.toggle('is-active', imgIndex === index);
+                });
+            }
+
+            showImage(currentIndex);
+
+            if (images.length <= 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                return;
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                    showImage(currentIndex);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    currentIndex = (currentIndex + 1) % images.length;
+                    showImage(currentIndex);
+                });
+            }
+        });
+    })();
+</script>
+</body>
+</html>

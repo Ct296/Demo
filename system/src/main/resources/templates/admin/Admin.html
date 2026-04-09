@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ITHotel</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/image/logofavicon.ico}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+</head>
+<body class="admin-body">
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div class="brand-box">
+            <div class="brand-icon">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <div>
+                <div class="brand-title">ITHotel Admin</div>
+                <div class="brand-subtitle"
+                     th:text="${currentUser != null ? currentUser.lastName + ' ' + currentUser.firstName : 'Quản trị viên'}">
+                    Quản trị viên
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#create-account-section" class="sidebar-link active">
+                <i class="fas fa-user-plus"></i>
+                <span>Tạo tài khoản</span>
+            </a>
+
+            <a href="#account-list-section" class="sidebar-link">
+                <i class="fas fa-users-cog"></i>
+                <span>Danh sách tài khoản</span>
+            </a>
+
+            <a href="#policy-management-section" class="sidebar-link">
+                <i class="fas fa-file-contract"></i>
+                <span>Quản lý chính sách</span>
+            </a>
+
+            <a th:href="@{/admin/profile}" class="sidebar-link">
+                <i class="fas fa-id-card"></i>
+                <span>Hồ sơ</span>
+            </a>
+
+            <form th:action="@{/logout}" method="post" class="mt-2">
+                <button type="submit" class="sidebar-link sidebar-button text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <section class="page-header">
+            <div>
+                <h1>Trang quản trị hệ thống</h1>
+                <p>Tạo tài khoản nhân sự, khóa tài khoản theo thời hạn và theo dõi thời điểm mở khóa trực tiếp trên danh sách tài khoản.</p>
+            </div>
+        </section>
+
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <section id="create-account-section" class="admin-card mb-4">
+            <div class="card-header-row">
+                <div>
+                    <h2>Tạo tài khoản MANAGER / STAFF</h2>
+                    <p>Admin tạo mới tài khoản cho quản lý và nhân viên. Manager phải chọn chức vụ, staff phải chọn thời gian vào làm.</p>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/accounts/create}" method="post" class="row g-3">
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Vai trò</label>
+                    <select id="roleSelect" name="role" class="form-select" required>
+                        <option value="">-- Chọn vai trò --</option>
+                        <option value="MANAGER">MANAGER</option>
+                        <option value="STAFF">STAFF</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Họ</label>
+                    <input type="text" name="lastName" class="form-control" maxlength="30" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Tên</label>
+                    <input type="text" name="firstName" class="form-control" maxlength="30" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" maxlength="50" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">CCCD / CMND / Hộ chiếu</label>
+                    <input type="text" name="pid" class="form-control" maxlength="20" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Số điện thoại</label>
+                    <input type="text" name="phoneNumber" class="form-control" maxlength="15" required>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Quốc tịch</label>
+                    <select name="nationality"
+                            class="form-select"
+                            data-country-select
+                            data-default-country="Vietnam"
+                            data-placeholder="-- Chọn quốc tịch --"
+                            required>
+                    </select>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Giới tính</label>
+                    <select name="sex" class="form-select" required>
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="MALE">MALE</option>
+                        <option value="FEMALE">FEMALE</option>
+                        <option value="UNSPECIFIED">UNSPECIFIED</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Ngày sinh</label>
+                    <input type="date" name="dateOfBirth" class="form-control" required>
+                </div>
+
+                <div id="managerTypeWrapper" class="col-lg-6" style="display: none;">
+                    <label class="form-label fw-semibold">Chức vụ manager</label>
+                    <select id="managerTypeSelect" name="managerType" class="form-select">
+                        <option value="">-- Chọn chức vụ manager --</option>
+                        <option th:each="item : ${managerTypes}"
+                                th:value="${item.name()}"
+                                th:text="${item.name()}">
+                        </option>
+                    </select>
+                </div>
+
+                <div id="employmentTimeWrapper" class="col-lg-6" style="display: none;">
+                    <label class="form-label fw-semibold">Thời gian vào làm của staff</label>
+                    <input id="employmentTimeInput" type="datetime-local" name="employmentTime" class="form-control">
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Tạo tài khoản
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section id="account-list-section" class="admin-card">
+            <div class="card-header-row account-header-row">
+                <div>
+                    <h2>Danh sách tài khoản hiện có</h2>
+                    <p>Chỉ dùng LOCK. Có thể khóa 7 ngày, 15 ngày, 30 ngày hoặc vô thời hạn. Với lock có thời hạn, hệ thống hiển thị trực tiếp thời điểm mở khóa theo endTime.</p>
+                </div>
+            </div>
+
+            <div class="table-responsive admin-table-wrap">
+                <table class="table align-middle admin-table account-table">
+                    <colgroup>
+                        <col class="col-user">
+                        <col class="col-role">
+                        <col class="col-email">
+                        <col class="col-phone">
+                        <col class="col-state">
+                        <col class="col-info">
+                        <col class="col-created">
+                        <col class="col-action">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Vai trò</th>
+                        <th>Email</th>
+                        <th>Điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th>Thông tin trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${accounts == null || accounts.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted py-4">Chưa có tài khoản nào.</td>
+                    </tr>
+
+                    <tr th:each="acc : ${accounts}">
+                        <td>
+                            <div class="account-user-cell">
+                                <div class="account-user-name"
+                                     th:text="${acc.user != null ? acc.user.lastName + ' ' + acc.user.firstName : acc.id}">
+                                    Nguyễn Văn A
+                                </div>
+                                <div class="account-user-id">
+                                    ID: <span th:text="${acc.id}">USR001</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge text-bg-dark role-chip"
+                                  th:text="${acc.user != null && acc.user.role != null ? acc.user.role.name() : 'N/A'}">
+                                MANAGER
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="cell-text-wrap" th:text="${acc.user != null ? acc.user.email : ''}">a@email.com</div>
+                        </td>
+
+                        <td>
+                            <div class="cell-text-wrap" th:text="${acc.user != null ? acc.user.phoneNumber : ''}">0123456789</div>
+                        </td>
+
+                        <td>
+                            <span class="badge state-chip"
+                                  th:classappend="${latestAccountStates != null && latestAccountStates[acc.id] != null && latestAccountStates[acc.id].name() == 'ACTIVE' ? ' text-bg-success' : ' text-bg-warning text-dark'}"
+                                  th:text="${latestAccountStates != null && latestAccountStates[acc.id] != null ? latestAccountStates[acc.id].name() : 'ACTIVE'}">
+                                ACTIVE
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="status-info-stack">
+                                <div class="status-line"
+                                     th:if="${latestAccountReasons != null && latestAccountReasons[acc.id] != null && latestAccountReasons[acc.id] != ''}">
+                                    <span class="status-label">Lý do</span>
+                                    <span class="status-value status-reason"
+                                          th:text="${latestAccountReasons[acc.id]}">Lý do</span>
+                                </div>
+
+                                <div class="status-line status-line-highlight"
+                                     th:if="${unlockTimes != null && unlockTimes[acc.id] != null}">
+                                    <span class="status-label">Mở khóa</span>
+                                    <span class="status-value"
+                                          th:text="${'Đến ' + #temporals.format(unlockTimes[acc.id], 'dd/MM/yyyy HH:mm')}">
+                                        Đến 24/03/2026 10:15
+                                    </span>
+                                </div>
+
+                                <div class="status-line"
+                                     th:if="${unlockTimes == null || unlockTimes[acc.id] == null}">
+                                    <span class="status-label">Mở khóa</span>
+                                    <span class="status-value text-muted">Không thời hạn</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="date-block"
+                                 th:text="${acc.user != null && acc.user.createDate != null ? #temporals.format(acc.user.createDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                                10/03/2026 09:00
+                            </div>
+                        </td>
+
+                        <td>
+                            <div th:if="${acc.user != null && currentUser != null && acc.user.id != currentUser.id}" class="action-stack">
+                                <form th:if="${latestAccountStates != null && latestAccountStates[acc.id] != null && latestAccountStates[acc.id].name() == 'ACTIVE'}"
+                                      th:action="@{'/admin/accounts/' + ${acc.id} + '/lock'}"
+                                      method="post"
+                                      class="status-form">
+                                    <div class="mb-2">
+                                        <select name="durationDays" class="form-select form-select-sm">
+                                            <option value="7">Khóa 7 ngày</option>
+                                            <option value="15">Khóa 15 ngày</option>
+                                            <option value="30">Khóa 30 ngày</option>
+                                            <option value="0">Khóa vô thời hạn</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <input type="text"
+                                               name="reason"
+                                               class="form-control form-control-sm"
+                                               placeholder="Lý do khóa (không bắt buộc)">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-warning btn-sm w-100 action-btn-lock">
+                                        <i class="fas fa-user-lock me-1"></i>Khóa tài khoản
+                                    </button>
+                                </form>
+
+                                <form th:if="${latestAccountStates != null && latestAccountStates[acc.id] != null && latestAccountStates[acc.id].name() == 'LOCKED'}"
+                                      th:action="@{'/admin/accounts/' + ${acc.id} + '/unlock'}"
+                                      method="post"
+                                      class="status-form status-form-soft">
+                                    <div class="mb-2">
+                                        <input type="text"
+                                               name="reason"
+                                               class="form-control form-control-sm"
+                                               placeholder="Lý do mở khóa (không bắt buộc)">
+                                    </div>
+
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100 action-btn-unlock">
+                                        <i class="fas fa-lock-open me-1"></i>Mở khóa
+                                    </button>
+                                </form>
+                            </div>
+
+                            <span th:if="${acc.user != null && currentUser != null && acc.user.id == currentUser.id}"
+                                  class="text-muted small">
+                                Tài khoản hiện tại
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="policy-management-section" class="admin-card mt-4">
+            <div class="card-header-row">
+                <div>
+                    <h2>Quản lý chính sách khách sạn</h2>
+                    <p>Thêm mới các chính sách về đặt phòng, quy định chung cho khách hàng hoặc nhân viên.</p>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/policies/create}" method="post" class="row g-3 mb-4">
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Tên chính sách</label>
+                    <input type="text" name="name" class="form-control" placeholder="VD: Chính sách hủy phòng" maxlength="100" required>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Đối tượng áp dụng</label>
+                    <select name="subject" class="form-select" required>
+                        <option value="">-- Chọn đối tượng --</option>
+                        <option th:each="subj : ${policySubjects}"
+                                th:value="${subj.name()}"
+                                th:text="${subj.displayName}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Nội dung chính sách</label>
+                    <textarea name="content" class="form-control" rows="4" placeholder="Nhập nội dung chi tiết của chính sách..." required></textarea>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>Thêm chính sách mới
+                    </button>
+                </div>
+            </form>
+
+            <hr>
+
+            <div class="table-responsive">
+                <table class="table align-middle admin-table">
+                    <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Tên chính sách</th>
+                        <th>Đối tượng</th>
+                        <th>Nội dung</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${policies == null || policies.isEmpty()}">
+                        <td colspan="6" class="text-center text-muted py-4">Chưa có chính sách nào được tạo.</td>
+                    </tr>
+
+                    <tr th:each="p : ${policies}">
+                        <td th:text="${p.policyNumber}">POL001</td>
+                        <td class="fw-bold" th:text="${p.name}">Tên chính sách</td>
+                        <td>
+                            <span class="badge text-bg-info text-white" th:text="${p.subject.displayName}">Khách hàng</span>
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 250px;" th:text="${p.content}">Nội dung</div>
+                        </td>
+                        <td th:text="${#temporals.format(p.createDate, 'dd/MM/yyyy HH:mm')}">10/03/2026</td>
+                        <td>
+                            <input type="hidden" class="policy-id" th:value="${p.policyNumber}">
+                            <input type="hidden" class="policy-name" th:value="${p.name}">
+                            <input type="hidden" class="policy-subject" th:value="${p.subject.name()}">
+                            <textarea class="policy-content d-none" hidden th:text="${p.content}"></textarea>
+
+                            <div class="d-flex gap-2">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary edit-policy-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editPolicyModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger delete-policy-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deletePolicyModal">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="modal fade" id="editPolicyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="editPolicyForm" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cập nhật chính sách</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên chính sách</label>
+                        <input type="text" name="name" id="editPolicyName" class="form-control" required maxlength="100">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đối tượng áp dụng</label>
+                        <select name="subject" id="editPolicySubject" class="form-select" required>
+                            <option th:each="subj : ${policySubjects}"
+                                    th:value="${subj.name()}"
+                                    th:text="${subj.displayName}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Nội dung chính sách</label>
+                        <textarea name="content" id="editPolicyContent" class="form-control" rows="6" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deletePolicyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deletePolicyForm" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Xác nhận xóa chính sách</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa chính sách <strong id="deletePolicyNameLabel"></strong>?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/common/country-select.js}"></script>
+<script th:src="@{/js/admin/admin.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

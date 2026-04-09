@@ -1,0 +1,23 @@
+[
+  {
+    "model_name": "nb",
+    "display_name": "MultinomialNB",
+    "macro_f1": 0.45202894251054854,
+    "weighted_f1": 0.7851811791271097,
+    "accuracy": 0.8283333333333334
+  },
+  {
+    "model_name": "logreg",
+    "display_name": "LogisticRegression",
+    "macro_f1": 0.5997127600167528,
+    "weighted_f1": 0.8833336899111172,
+    "accuracy": 0.89
+  },
+  {
+    "model_name": "svm",
+    "display_name": "LinearSVC",
+    "macro_f1": 0.5697428878678268,
+    "weighted_f1": 0.8808415778668491,
+    "accuracy": 0.895
+  }
+]
